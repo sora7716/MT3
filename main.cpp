@@ -26,41 +26,41 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const float kLeftTopX = -width / 2.0f;
 	const float kLeftTopY = -height / 2.0f;
 
-	const float kLeftTopX2 = -width / 2.0f;
-	const float kLeftTopY2 = height / 2.0f;
+	const float kLeftBottomX = -width / 2.0f;
+	const float kLeftBottomY = height / 2.0f;
 
 	const float kRightTopX = width / 2.0f;
 	const float kRightTopY = -height / 2.0f;
 
-	const float kRightTopX2 = width / 2.0f;
-	const float kRightTopY2 = height / 2.0f;
+	const float kRightBottomX = width / 2.0f;
+	const float kRightBottomY = height / 2.0f;
 
 	//回転
 	float theta = float(M_PI);
 	float leftTopRotateX = 0.0f;
 	float leftTopRotateY = 0.0f;
 
-	float leftTopRotateX2 = 0.0f;
-	float leftTopRotateY2 = 0.0f;
+	float leftBottomRotateX = 0.0f;
+	float leftBottomRotateY = 0.0f;
 
 	float rightTopRotateX = 0.0f;
 	float rightTopRotateY = 0.0f;
 
-	float rightTopRotateX2 = 0.0f;
-	float rightTopRotateY2 = 0.0f;
+	float rightBottomRotateX = 0.0f;
+	float rightBottomRotateY = 0.0f;
 
 	//元の位置に戻す
-	float leftPosX = centerPosX;
-	float leftPosY = centerPosY;
+	float leftTopPosX = 0.0f;
+	float leftTopPosY = 0.0f;
 
-	float leftPosX2 = centerPosX;
-	float leftPosY2 = centerPosY + height;
+	float leftBottomPosX = 0.0f;
+	float leftBottomPosY =0.0f;
 
-	float rightPosX = centerPosX + width;
-	float rightPosY = centerPosY;
+	float rightTopPosX = 0.0f;
+	float rightTopPosY = 0.0f;
 
-	float rightPosX2 = centerPosX + width;
-	float rightPosY2 = centerPosY + height;
+	float rightBottomPosX = 0.0f;
+	float rightBottomPosY = 0.0f;
 
 	//開店するかのフラグ
 	bool isRotate = false;
@@ -92,27 +92,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		leftTopRotateX = kLeftTopX * cosf(theta) - kLeftTopY * sinf(theta);
 		leftTopRotateY = kLeftTopY * cosf(theta) + kLeftTopX * sinf(theta);
 
-		leftTopRotateX2 = kLeftTopX2 * cosf(theta) - kLeftTopY2 * sinf(theta);
-		leftTopRotateY2 = kLeftTopY2 * cosf(theta) + kLeftTopX2 * sinf(theta);
+		leftBottomRotateX = kLeftBottomX * cosf(theta) - kLeftBottomY * sinf(theta);
+		leftBottomRotateY = kLeftBottomY * cosf(theta) + kLeftBottomX * sinf(theta);
 
 		rightTopRotateX = kRightTopX * cosf(theta) - kRightTopY * sinf(theta);
 		rightTopRotateY = kRightTopY * cosf(theta) + kRightTopX * sinf(theta);
 
-		rightTopRotateX2 = kRightTopX2 * cosf(theta) - kRightTopY2 * sinf(theta);
-		rightTopRotateY2 = kRightTopY2 * cosf(theta) + kRightTopX2 * sinf(theta);
+		rightBottomRotateX = kRightBottomX * cosf(theta) - kRightBottomY * sinf(theta);
+		rightBottomRotateY = kRightBottomY * cosf(theta) + kRightBottomX * sinf(theta);
 
 		//回転の中心を動かす
-		leftPosX = leftTopRotateX + centerPosX;
-		leftPosY = leftTopRotateY + centerPosY;
+		leftTopPosX = leftTopRotateX + centerPosX;
+		leftTopPosY = leftTopRotateY + centerPosY;
 
-		leftPosX2 = leftTopRotateX2 + centerPosX;
-		leftPosY2 = leftTopRotateY2 + centerPosY;
+		leftBottomPosX = leftBottomRotateX + centerPosX;
+		leftBottomPosY = leftBottomRotateY + centerPosY;
 
-		rightPosX = rightTopRotateX + centerPosX;
-		rightPosY = rightTopRotateY + centerPosY;
+		rightTopPosX = rightTopRotateX + centerPosX;
+		rightTopPosY = rightTopRotateY + centerPosY;
 
-		rightPosX2 = rightTopRotateX2 + centerPosX;
-		rightPosY2 = rightTopRotateY2 + centerPosY;
+		rightBottomPosX = rightBottomRotateX + centerPosX;
+		rightBottomPosY = rightBottomRotateY + centerPosY;
 
 		///
 		/// ↑更新処理ここまで
@@ -127,10 +127,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 		//白いボックス
 		Novice::DrawQuad(
-			static_cast<int>(leftPosX), static_cast<int>(leftPosY),
-			static_cast<int>(rightPosX), static_cast<int>(rightPosY),
-			static_cast<int>(leftPosX2), static_cast<int>(leftPosY2),
-			static_cast<int>(rightPosX2), static_cast<int>(rightPosY2),
+			static_cast<int>(leftTopPosX), static_cast<int>(leftTopPosY),
+			static_cast<int>(rightTopPosX), static_cast<int>(rightTopPosY),
+			static_cast<int>(leftBottomPosX), static_cast<int>(leftBottomPosY),
+			static_cast<int>(rightBottomPosX), static_cast<int>(rightBottomPosY),
 			0, 0, 1, 1, textureHandle, WHITE
 		);
 
