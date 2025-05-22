@@ -1,6 +1,7 @@
 #include "gameObject/Camera.h"
 #include "gameObject/Grid.h"
 #include "gameObject/Sphere.h"
+#include "gameObject/Plane.h"
 
 const char kWindowTitle[] = "イイヅカ_ソラ";
 
@@ -27,6 +28,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	sphreData.color = WHITE;
 	sphere->Initialize(camera, &sphreData);
 
+	Plane* plane = new Plane();
+	PlaneData planeData;
+	planeData.normal = {};
+	planeData.distance = {};
+	planeData.color = WHITE;
+	plane->Initialize(camera);
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -48,10 +55,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		camera->Update(keys, preKeys);
 		grid->Update();
 		sphere->Update();
+		plane->Update();
 		sphere->OnCollision();
 
 		camera->DebugText();
 		sphere->DebugText();
+		plane->DebugText();
 		///
 		/// ↑更新処理ここまで
 		///
@@ -61,6 +70,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		grid->Draw();
 		sphere->Draw();
+		plane->Draw();
 		///
 		/// ↑描画処理ここまで
 		///

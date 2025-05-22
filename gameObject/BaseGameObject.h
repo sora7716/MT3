@@ -1,7 +1,13 @@
 #pragma once
 #include "gameObject/Camera.h"
+#include "myMath/ShapeData.h"
 #include "myMath/RenderingData.h"
 #include <vector>
+//座標
+typedef struct Coord {
+	Vector3 local;
+	std::vector<Vector3> screen;
+}Coord;
 
 /// <summary>
 /// ゲームオブジェクトの基盤

@@ -5,24 +5,10 @@
 class Grid;
 class Plane;
 
-//スフィアに使う構造体
-typedef struct SphereData {
-	Vector3 center;
-	float radius;
-	uint32_t color = WHITE;//色
-	bool isHit = false;//衝突したか
-}SphereMaterial;
-
 /// <summary>
 /// スフィア
 /// </summary>
 class Sphere :public BaseGameObject {
-private://構造体
-	//座標
-	typedef struct Coord {
-		Vector3 local;
-		std::vector<Vector3> screen;
-	}Coord;
 public://メンバ関数
 	/// <summary>
 	/// コンストラクタ
