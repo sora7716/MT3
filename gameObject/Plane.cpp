@@ -5,7 +5,7 @@
 #include <string>
 using namespace std;
 //初期化
-void Plane::Initialize(Camera* camera, PlaneData* planeData) {
+void Plane::Initialize(Camera* camera, const PlaneData&& planeData) {
 	camera_ = camera;
 	planeData_ = planeData;
 }
@@ -70,8 +70,8 @@ const PlaneData& Plane::GetPlaneMaterial() {
 }
 
 //平面のデータのセッター
-void Plane::SetPlane(const PlaneData& material) {
-	planeData_ = material;
+void Plane::SetPlane(const PlaneData& planeData) {
+	planeData_ = planeData;
 }
 
 //垂直

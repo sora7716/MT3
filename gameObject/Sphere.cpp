@@ -9,7 +9,7 @@
 using namespace std;
 
 //初期化
-void Sphere::Initialize(Camera* camera, SphereData* sphereData) {
+void Sphere::Initialize(Camera* camera, const SphereData&& sphereData) {
 	//球の素材を記録
 	sphereData_ = sphereData;
 	//カメラを記録
@@ -18,10 +18,10 @@ void Sphere::Initialize(Camera* camera, SphereData* sphereData) {
 	transform_.scale = { 1.0f,1.0f,1.0f };
 	transform_.rotate = { 0.0f,0.0f,0.0f };
 	transform_.translate = { 0.0f,0.0f,0.0f };
-	transform_.scale = { sphereData_->radius,sphereData_->radius,sphereData_->radius };
-	transform_.translate = sphereData_->center;
+	transform_.scale = { sphereData_.radius,sphereData_.radius,sphereData_.radius };
+	transform_.translate = sphereData_.center;
 	//カラーの初期化
-	defaultColor = sphereData_->color;
+	defaultColor = sphereData_.color;
 }
 
 //更新処理
@@ -88,13 +88,13 @@ void Sphere::Draw() {
 		Novice::DrawLine(
 			(int)coordA_.screen[i].x, (int)coordA_.screen[i].y,
 			(int)coordB_.screen[i].x, (int)coordB_.screen[i].y,
-			sphereData_->color
+			sphereData_.color
 		);
 		//横の線の描画
 		Novice::DrawLine(
 			(int)coordB_.screen[i].x, (int)coordB_.screen[i].y,
 			(int)coordC_.screen[i].x, (int)coordC_.screen[i].y,
-			sphereData_->color
+			sphereData_.color
 		);
 	}
 }
@@ -102,21 +102,21 @@ void Sphere::Draw() {
 //当たった時の判定
 void Sphere::OnCollision() {
 	//判定を見る
-	if (sphereData_->isHit) {
-		sphereData_->color = RED;
+	if (sphereData_.isHit) {
+		SetColor(RED);
 	} else {
-		sphereData_->color = defaultColor;
+		SetColor(defaultColor);
 	}
 }
 
 //カラーのセッター
 void Sphere::SetColor(uint32_t color) {
-	sphereData_->color = color;
+	sphereData_.color = color;
 }
 
 //スフィアの素材のゲッター
 const SphereData& Sphere::GetSphereMaterial()const {
-	return *sphereData_;
+	return sphereData_;
 }
 
 //平面のセッター
@@ -130,12 +130,12 @@ void Sphere::SetCamera(Camera* camera) {
 }
 
 //球の素材のセッター
-void Sphere::SetSphere(SphereData* sphereData) {
+void Sphere::SetSphere(const SphereData& sphereData) {
 	sphereData_ = sphereData;
 }
 
 //当たり判定のセッター
 void Sphere::SetIsHit(bool isHit) {
-	sphereData_->isHit = isHit;
+	sphereData_.isHit = isHit;
 }
 

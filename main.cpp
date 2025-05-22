@@ -26,14 +26,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	sphreData.center = { 0.0f,0.0f,0.0f };
 	sphreData.radius = 0.5f;
 	sphreData.color = WHITE;
-	sphere->Initialize(camera, &sphreData);
+	sphere->Initialize(camera, std::move(sphreData));
 
 	Plane* plane = new Plane();
 	PlaneData planeData;
-	planeData.normal = {};
+	planeData.normal = {0.0f,0.0f,0.0f};
 	planeData.distance = {};
 	planeData.color = WHITE;
-	plane->Initialize(camera);
+	plane->Initialize(camera, std::move(planeData));
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始

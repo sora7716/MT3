@@ -27,7 +27,7 @@ public://メンバ関数
 	/// </summary>
 	/// <param name="camera">カメラ</param>
 	/// <param name="planeData">平面の素材{normal,distance,color}</param>
-	void Initialize(Camera* camera, PlaneData* planeData);
+	void Initialize(Camera* camera, const PlaneData&& planeData);
 
 	/// <summary>
 	/// 更新処理
@@ -53,8 +53,8 @@ public://メンバ関数
 	/// <summary>
 	/// 平面のデータのセッター
 	/// </summary>
-	/// <param name="material">平面の素材</param>
-	void SetPlane(const PlaneData& material);
+	/// <param name="planeData_">平面のデータ</param>
+	void SetPlane(const PlaneData& planeData);
 
 private://メンバ関数
 	/// <summary>

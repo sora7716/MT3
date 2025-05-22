@@ -25,7 +25,7 @@ public://メンバ関数
 	/// </summary>
 	/// <param name="camera">カメラ</param>
 	/// <param name="sphere">スフィアの素材{positon,radius,color}</param>
-	void Initialize(Camera* camera, SphereData* sphereMaterial);
+	void Initialize(Camera* camera, const SphereData&& sphereMaterial);
 
 	/// <summary>
 	/// 更新処理
@@ -77,7 +77,7 @@ public://メンバ関数
 	/// 球の素材のセッター
 	/// </summary>
 	/// <param name="material">球の素材</param>
-	void SetSphere(SphereData* sphereData);
+	void SetSphere(const SphereData& sphereData);
 
 	/// <summary>
 	/// 当たり判定のセッター
@@ -89,7 +89,7 @@ private://メンバ変数
 	//カメラ
 	Camera* camera_ = nullptr;
 	//スフィアのデータ
-	SphereData* sphereData_ = {};
+	SphereData sphereData_ = {};
 	//平面
 	Plane* plane_ = nullptr;
 	//スクリーン座標
