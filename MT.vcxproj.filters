@@ -71,6 +71,12 @@
     <ClCompile Include="gameObject\Plane.cpp">
       <Filter>KamataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="gameObject\Line.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
+    <ClCompile Include="gameObject\AABB.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -203,5 +209,7 @@
     <ClInclude Include="myMath\ShapeData.h">
       <Filter>math</Filter>
     </ClInclude>
+    <ClInclude Include="gameObject\Line.h" />
+    <ClInclude Include="gameObject\AABB.h" />
   </ItemGroup>
 </Project>

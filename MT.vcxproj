@@ -109,10 +109,12 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="C:\KamataEngine\Adapter\Novice.cpp" />
+    <ClCompile Include="gameObject\AABB.cpp" />
     <ClCompile Include="gameObject\Camera.cpp" />
     <ClCompile Include="gameObject\BaseGameObject.cpp" />
     <ClCompile Include="gameObject\GameObject.cpp" />
     <ClCompile Include="gameObject\Grid.cpp" />
+    <ClCompile Include="gameObject\Line.cpp" />
     <ClCompile Include="gameObject\Plane.cpp" />
     <ClCompile Include="gameObject\Sphere.cpp" />
     <ClCompile Include="main.cpp" />
@@ -153,10 +155,12 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="C:\KamataEngine\DirectXGame\input\Input.h" />
     <ClInclude Include="C:\KamataEngine\DirectXGame\scene\GameScene.h" />
     <ClInclude Include="C:\KamataEngine\Adapter\Novice.h" />
+    <ClInclude Include="gameObject\AABB.h" />
     <ClInclude Include="gameObject\Camera.h" />
     <ClInclude Include="gameObject\BaseGameObject.h" />
     <ClInclude Include="gameObject\GameObject.h" />
     <ClInclude Include="gameObject\Grid.h" />
+    <ClInclude Include="gameObject\Line.h" />
     <ClInclude Include="gameObject\Plane.h" />
     <ClInclude Include="gameObject\Sphere.h" />
     <ClInclude Include="myMath\func\Aithmetic.h" />
