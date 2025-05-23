@@ -50,3 +50,17 @@ typedef struct RectVertex {
 	Vector3 leftBottom;
 	Vector3 rightBottom;
 }RectVertex;
+
+
+//OBBのデータ
+typedef struct OBBData {
+	Vector3 center;//中心 translation
+	Vector3 orientations[3] = {
+		{1.0f,0.0f,0.0f},
+		{0.0f,1.0f,0.0f},
+		{0.0f,0.0f,1.0f},
+	};//座標軸。正規化・直行必須 rotation
+	Vector3 size = { 1.0f,1.0f,1.0f };//座標軸方向の長さの半分。中心から面までの距離 scale
+	Vector3 rotate = {};//回転
+	uint32_t color = WHITE;//色
+}ObbData;

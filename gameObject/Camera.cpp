@@ -97,5 +97,5 @@ void Camera::RenderingPipeline() {
 	//ビュープロジェクションマトリックス
 	viewProjectionMatrix_ = viewMatrix_ * projectionMatrix_;
 	//ビューポートマトリックス
-	viewportMatrix_ = Rendering::MakeViewportMatrix(0, 0, float(windowWidth_), float(windowHeight_), 0.0f, 1.0f);
+	viewportMatrix_ = Rendering::MakeViewportMatrix(0.0f, 0.0f, float(windowWidth_), float(windowHeight_), 0.0f, 1.0f);
 }

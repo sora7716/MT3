@@ -1,9 +1,4 @@
 #include "AABB.h"
-#include "gameObject/Camera.h"
-#include <string>
-#ifdef _DEBUG
-#include "imgui.h"
-#endif // _DEBUG
 using namespace std;
 
 //初期化

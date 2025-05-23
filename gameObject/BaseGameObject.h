@@ -2,6 +2,10 @@
 #include "gameObject/Camera.h"
 #include "myMath/ShapeData.h"
 #include "myMath/RenderingData.h"
+#ifdef _DEBUG
+#include "imgui.h"
+#endif // _DEBUG
+#include <string>
 #include <vector>
 //座標
 typedef struct Coord {
@@ -40,20 +44,6 @@ protected://メンバ関数
 	/// <returns>スクリーン座標</returns>
 	Vector3 ScreenTransform(Camera*camera,const Vector3& local);
 
-	/// <summary>
-	/// ワールドビュープロジェクションだけの計算
-	/// </summary>
-	/// <param name="camera">カメラ</param>
-	void OBBWvpMatrix(const Camera* camera);
-
-	/// <summary>
-	/// OBB空間に変換
-	/// </summary>
-	/// <param name="camera">カメラ</param>
-	/// <param name="local">ローカル座標</param>
-	/// <param name="screen">スクリーン座標</param>
-	void OBBTransform(const Camera* camera, const Vector3& local, Vector3& screen);
-
 public://メンバ関数
 	/// <summary>
 	/// ワールドビュープロジェクションのゲッター
@@ -72,7 +62,6 @@ public://メンバ関数
 	/// </summary>
 	/// <returns></returns>
 	const Vector3 GetWorldPosition();
-
 protected://メンバ変数
 	//ワールドマトリックス
 	Matrix4x4 worldMatrix_ = {};

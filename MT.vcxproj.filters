@@ -77,6 +77,9 @@
     <ClCompile Include="gameObject\AABB.cpp">
       <Filter>KamataEngine</Filter>
     </ClCompile>
+    <ClCompile Include="gameObject\OBB.cpp">
+      <Filter>KamataEngine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="C:\KamataEngine\DirectXGame\audio\Audio.h">
@@ -211,5 +214,6 @@
     </ClInclude>
     <ClInclude Include="gameObject\Line.h" />
     <ClInclude Include="gameObject\AABB.h" />
+    <ClInclude Include="gameObject\OBB.h" />
   </ItemGroup>
 </Project>

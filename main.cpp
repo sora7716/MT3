@@ -4,6 +4,7 @@
 #include "gameObject/Plane.h"
 #include "gameObject/Line.h"
 #include "gameObject/AABB.h"
+#include "gameObject/OBB.h"
 
 const char kWindowTitle[] = "イイヅカ_ソラ";
 
@@ -63,6 +64,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		.max = {1.0f,1.0f,1.0f}
 	};
 	aabb->Initialize(camera, std::move(aabbData));
+
+	OBB* obb = new OBB();
+	OBBData obbData;
+	obbData.center = {};
+	obbData.color = WHITE;
+	obb->Initialize(camera, std::move(obbData));
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -85,13 +92,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		line[2]->SetCatmullRomPoints(catmullRomPoint);
 
 		camera->DebugText();
-		sphere->DebugText();
-		plane->DebugText();
+		//sphere->DebugText();
+		/*plane->DebugText();*/
 
 		aabb->Update();
-		aabb->DebugText();
+		//aabb->DebugText();
 
-		ImGui::Begin("bezier");
+		obb->Update();
+	    obb->DebagText();
+
+		/*ImGui::Begin("bezier");
 		ImGui::DragFloat3("0", &bezierPoint[0].x, 0.1f);
 		ImGui::DragFloat3("1", &bezierPoint[1].x, 0.1f);
 		ImGui::DragFloat3("2", &bezierPoint[2].x, 0.1f);
@@ -102,7 +112,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::DragFloat3("1", &catmullRomPoint[1].x, 0.1f);
 		ImGui::DragFloat3("2", &catmullRomPoint[2].x, 0.1f);
 		ImGui::DragFloat3("3", &catmullRomPoint[3].x, 0.1f);
-		ImGui::End();
+		ImGui::End();*/
 		///
 		/// ↑更新処理ここまで
 		///
@@ -111,12 +121,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 		grid->Draw();
-		sphere->Draw();
-		plane->Draw();
-		line[0]->DrawSegment();
-		line[1]->DrawBezier();
-		line[2]->DrawCatmullRom();
-		aabb->Draw();
+		//sphere->Draw();
+		//plane->Draw();
+		//line[0]->DrawSegment();
+		//line[1]->DrawBezier();
+		//line[2]->DrawCatmullRom();
+		//aabb->Draw();
+		obb->Draw();
 		///
 		/// ↑描画処理ここまで
 		///

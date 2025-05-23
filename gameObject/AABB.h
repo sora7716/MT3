@@ -1,8 +1,9 @@
 #pragma once
 #include "gameObject/BaseGameObject.h"
 
-class Camera;
-//AABBクラス
+/// <summary>
+/// AABB
+/// </summary>
 class AABB :public BaseGameObject {
 public://メンバ関数
 	/// <summary>
@@ -72,7 +73,7 @@ public://メンバ関数
 	/// </summary>
 	/// <returns>AABBデータ</returns>
 	AABBData GetAABBMaterial()const;
-private://静的メンバ変数
+public://静的メンバ変数
 	static inline const int kAABB2DNum = 2;//2次元で見たAABBの数
 private://メンバ変数
 	AABBData aabbData_ = {};

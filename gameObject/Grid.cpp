@@ -20,7 +20,7 @@ void Grid::Update() {
 	const float kGridHalfWidth = 2.0f;//Gridの半分の幅
 	const float kGridEvery = (kGridHalfWidth * 2.0f) / (float)kSubdivision;//1つ分の長さ
 
-	for (uint32_t i = 0; i <= kSubdivision; ++i) {
+	for (uint32_t i = 0; i <= kSubdivision; i++) {
 		//ローカルの開始位置
 		xLine_[i].localStart.x = (-(float)kSubdivision / 2.0f + (float)i) * kGridEvery;
 		xLine_[i].localStart.z = -kGridHalfWidth;
@@ -37,7 +37,7 @@ void Grid::Update() {
 		xLine_[i].color = (i == kSubdivision / 2) ? BLUE : 0xFFFFFF88;
 	}
 
-	for (uint32_t i = 0; i <= kSubdivision; ++i) {
+	for (uint32_t i = 0; i <= kSubdivision; i++) {
 		//ローカルの開始位置
 		zLine_[i].localStart.z = (-(float)kSubdivision / 2.0f + (float)i) * kGridEvery;
 		zLine_[i].localStart.x = -kGridHalfWidth;

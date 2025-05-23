@@ -115,6 +115,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="gameObject\GameObject.cpp" />
     <ClCompile Include="gameObject\Grid.cpp" />
     <ClCompile Include="gameObject\Line.cpp" />
+    <ClCompile Include="gameObject\OBB.cpp" />
     <ClCompile Include="gameObject\Plane.cpp" />
     <ClCompile Include="gameObject\Sphere.cpp" />
     <ClCompile Include="main.cpp" />
@@ -161,6 +162,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="gameObject\GameObject.h" />
     <ClInclude Include="gameObject\Grid.h" />
     <ClInclude Include="gameObject\Line.h" />
+    <ClInclude Include="gameObject\OBB.h" />
     <ClInclude Include="gameObject\Plane.h" />
     <ClInclude Include="gameObject\Sphere.h" />
     <ClInclude Include="myMath\func\Aithmetic.h" />
