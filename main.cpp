@@ -3,6 +3,11 @@
 #include <math.h>
 const char kWindowTitle[] = "GC1D 01 イイヅカ　ソラ";
 
+typedef struct Vector2 {
+	float x;
+	float y;
+}Vector2;
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -83,9 +88,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			isRotate ^= true;
 		}
 
-		//Θを動かす
+		//θを動かす
 		if (isRotate) {
-			theta += 1.0 / 15.0 * float(M_PI);
+			theta += 1.0f / 15.0f * float(M_PI);
 		}
 
 		//加法定理して回転させる
