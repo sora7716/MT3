@@ -13,7 +13,7 @@ typedef struct PlaneData {
 typedef struct SphereData {
 	Vector3 center;//中心
 	float radius;//半径
-	uint32_t color = WHITE;//色
+	uint32_t color = 0xFFFFFFFF;//色
 	bool isHit = false;//衝突したか
 }SphereData;
 
@@ -39,7 +39,7 @@ typedef struct Segment {
 typedef struct AABBData {
 	Vector3 min;//最小点
 	Vector3 max;//最大点
-	uint32_t color = WHITE;//色
+	uint32_t color = 0xFFFFFFFF;//色
 	bool isHit = false;//衝突したか
 }AABBData;
 
@@ -62,5 +62,5 @@ typedef struct OBBData {
 	};//座標軸。正規化・直行必須 rotation
 	Vector3 size = { 1.0f,1.0f,1.0f };//座標軸方向の長さの半分。中心から面までの距離 scale
 	Vector3 rotate = {};//回転
-	uint32_t color = WHITE;//色
+	uint32_t color = 0xFFFFFFFF;//色
 }ObbData;

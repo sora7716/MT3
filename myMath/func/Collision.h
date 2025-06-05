@@ -1,6 +1,6 @@
 #pragma once
 #include "myMath/Vector3.h"
-#include "gameObject/GameObject.h"
+#include "myMath/ShapeData.h"
 
 //前方宣言
 class Sphere;
@@ -30,17 +30,17 @@ public://メンバ関数
 	/// </summary>
 	/// <param name="sphere1">球1</param>
 	/// <param name="sphere2">球2</param>
-	bool IsCollision(const GameObject::SphereMaterial& sphere1, const GameObject::SphereMaterial& sphere2);
+	bool IsCollision(const SphereData& sphere1, const SphereData& sphere2);
 
-	/*/// <summary>
+	/// <summary>
 	/// 衝突判定(球と平面)
 	/// </summary>
 	/// <param name="sphere">球</param>
 	/// <param name="plane">平面</param>
 	/// <returns>当たったかどうか</returns>
-	bool IsCollision(const GameObject::SphereMaterial& sphere, const GameObject::PlaneMaterial& plane);
+	bool IsCollision(const SphereData& sphere, const PlaneData& plane);
 
-	/// <summary>
+	/*/// <summary>
 	/// 衝突判定(線と平面)
 	/// </summary>
 	/// <param name="segment">線分</param>

@@ -5,6 +5,7 @@
 #include "gameObject/Line.h"
 #include "gameObject/AABB.h"
 #include "gameObject/OBB.h"
+#include "myMath/func/Collision.h"
 
 const char kWindowTitle[] = "イイヅカ_ソラ";
 
@@ -38,6 +39,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	planeData.color = WHITE;
 	plane->Initialize(camera, std::move(planeData));
 
+	Sphere* point[2];
+	point[0] = new Sphere();
+	point[1] = new Sphere();
+
 	Line* line[3];
 	Segment segment[3];
 	for (int i = 0;i < 3;i++) {
@@ -51,6 +56,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{1.0f,1.0f,2.5f},
 		{1.0f,1.0f,1.0f},
 	};
+
+	line[0]->SetSegment({ {-2.0f,-1.0f,0.0f},{3.0f,2.0f,2.0f} });
+	line[0]->SetPoint({ -1.5f,0.6f,0.6f });
 
 	std::vector<Vector3>catmullRomPoint;
 	catmullRomPoint.push_back({ 1.0f,1.0f,1.0f });
@@ -86,20 +94,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		camera->Update(keys, preKeys);
 		grid->Update();
 		sphere->Update();
+		sphere->OnCollision();
 		plane->Update();
 
+		point[0]->Initialize(camera, { line[0]->GetPoint(), 0.01f });
+		point[1]->Initialize(camera, { line[0]->GetClosestPoint(), 0.01f });
+		point[0]->Update();
+		point[1]->Update();
 		line[1]->SetBezierPoints(bezierPoint);
 		line[2]->SetCatmullRomPoints(catmullRomPoint);
 
 		camera->DebugText();
-		//sphere->DebugText();
-		/*plane->DebugText();*/
+		sphere->DebugText();
+		plane->DebugText();
 
 		aabb->Update();
 		//aabb->DebugText();
 
 		obb->Update();
-	    obb->DebagText();
+
+		
+		sphere->SetIsHit(Collision::GetInstance()->IsCollision(sphere->GetSphereMaterial(), plane->GetPlaneMaterial()));
+	    //obb->DebagText();
 
 		/*ImGui::Begin("bezier");
 		ImGui::DragFloat3("0", &bezierPoint[0].x, 0.1f);
@@ -121,13 +137,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 		grid->Draw();
-		//sphere->Draw();
-		//plane->Draw();
+		sphere->Draw();
+		plane->Draw();
 		//line[0]->DrawSegment();
 		//line[1]->DrawBezier();
 		//line[2]->DrawCatmullRom();
 		//aabb->Draw();
-		obb->Draw();
+		//obb->Draw();
+		/*point[0]->Draw();
+		point[1]->Draw();*/
 		///
 		/// ↑描画処理ここまで
 		///

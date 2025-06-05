@@ -4,6 +4,7 @@
 //#include "gameObject/hexagon/Hexagon.h"
 //#include "gameObject/capsule/Capsule.h"
 //#include "gameObject/triangle/Triangle.h"
+#include "Math.h"
 #include <algorithm> 
 using namespace std;
 
@@ -16,20 +17,20 @@ Collision* Collision::GetInstance() {
 }
 
 //球同士
-bool Collision::IsCollision(const GameObject::SphereMaterial& sphere1, const GameObject::SphereMaterial& sphere2) {
+bool Collision::IsCollision(const SphereData& sphere1, const SphereData& sphere2) {
 	float distance = Math::Length(sphere1.center - sphere2.center);
 	return distance <= sphere1.radius + sphere2.radius;
 }
 
-////球と平面
-//bool Collision::IsCollision(const GameObject::SphereMaterial& sphere, const GameObject::PlaneMaterial& plane) {
-//	Vector3 normal = plane.normal;
-//	float distance = plane.distance;
-//	float k = fabs(Math::Dot(normal, sphere.center) - distance);
-//
-//	return k <= sphere.radius;
-//}
-//
+//球と平面
+bool Collision::IsCollision(const SphereData& sphere, const PlaneData& plane) {
+	Vector3 normal = plane.normal;
+	float distance = plane.distance;
+	float k = fabs(Math::Dot(normal, sphere.center) - distance);
+
+	return k <= sphere.radius;
+}
+
 ////線と平面
 //bool Collision::IsCollision(const GameObject::Segment& segment, const GameObject::PlaneMaterial& plane) {
 //	//垂直判定を行うための、法線と線の内積を求める
