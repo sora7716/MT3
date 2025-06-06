@@ -21,12 +21,23 @@ typedef struct Vector2 {
 		return *this;
 	}
 
-	/*Vector2& operator*=(float num) {
-		this->x *= num;
-		this->y *= num;
-		return *this;
-	}*/
+	Vector2 operator*(float num) {
+		Vector2 result{
+			x * num,
+			y * num,
+		};
+		return result;
+	}
 }Vector2;
+
+//float*Vector2
+Vector2 operator*(float num, const Vector2& v) {
+	Vector2 result{
+		v.x * num,
+		v.y * num,
+	};
+	return result;
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -63,28 +74,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
-
-		//元の位置に戻す
-		topPos = rotation + centerPos;
+		//スカラー倍
 		scale += scaleSpeed;
-		vector.x *= scale;
-		vector.y *= scale;
 
-
-		if (vector.y <= 100) {
+		//0.5～2.0の範囲に収める
+		if (scale <= 0.5f) {
+			scale = 0.5f; // 確実に境界値に設定
+			scaleSpeed *= -1;
+		} else if (scale > 2.0f) {
+			scale = 2.0f; // 確実に境界値に設定
 			scaleSpeed *= -1;
 		}
-		if (vector.y >= 400) {
-			scaleSpeed *= -1;
-		}
-
-		Novice::ScreenPrintf(0, 0, "scale%f", scale);
 
 		//回転
 		theta -= 1.0f / 120.0f * float(M_PI);
 		rotation.x = vector.x * cosf(theta) - vector.y * sinf(theta);
 		rotation.y = vector.y * cosf(theta) + vector.x * sinf(theta);
 
+		//元の位置に戻す
+		topPos = centerPos + scale * rotation;
 
 		///
 		/// ↑更新処理ここまで
