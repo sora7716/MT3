@@ -23,12 +23,12 @@ bool Collision::IsCollision(const SphereData& sphere1, const SphereData& sphere2
 }
 
 //球と平面
-bool Collision::IsCollision(const SphereData& sphere, const PlaneData& plane) {
+bool Collision::IsCollision(const Transform& sphere, const PlaneData& plane) {
 	Vector3 normal = plane.normal;
 	float distance = plane.distance;
-	float k = fabs(Math::Dot(normal, sphere.center) - distance);
+	float k = fabs(Math::Dot(normal, sphere.translate - distance));
 
-	return k <= sphere.radius;
+	return k <= sphere.scale.x || k <= sphere.scale.y || k <= sphere.scale.z;
 }
 
 ////線と平面

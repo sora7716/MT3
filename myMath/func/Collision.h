@@ -1,6 +1,7 @@
 #pragma once
 #include "myMath/Vector3.h"
 #include "myMath/ShapeData.h"
+#include "myMath/RenderingData.h"
 
 //前方宣言
 class Sphere;
@@ -38,7 +39,7 @@ public://メンバ関数
 	/// <param name="sphere">球</param>
 	/// <param name="plane">平面</param>
 	/// <returns>当たったかどうか</returns>
-	bool IsCollision(const SphereData& sphere, const PlaneData& plane);
+	bool IsCollision(const Transform& sphere, const PlaneData& plane);
 
 	/*/// <summary>
 	/// 衝突判定(線と平面)

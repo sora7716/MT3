@@ -69,15 +69,10 @@ void Sphere::Update() {
 //デバックテキスト
 void Sphere::DebugText(const char* name) {
 #ifdef _DEBUG
-	string radiusLabel = string(name) + ".scale";
-	ImGui::DragFloat3(radiusLabel.c_str(), &transform_.scale.x, 0.01f);
-
-	string rotateLabel = string(name) + ".rotate";
-	ImGui::DragFloat3(rotateLabel.c_str(), &transform_.rotate.x, 0.1f);
-
-	string centerLabel = string(name) + ".center";
-	ImGui::DragFloat3(centerLabel.c_str(), &transform_.translate.x, 0.01f);
-	/*ImGui::DragFloat3("ce", &lissajousCenter_.x, 0.1f);*/
+	ImGui::DragFloat3((static_cast<string>(name) + ".scale").c_str(), & transform_.scale.x, 0.01f);
+	ImGui::DragFloat3((static_cast<string>(name) + ".rotate").c_str(), &transform_.rotate.x, 0.1f);
+	ImGui::DragFloat3((static_cast<string>(name) + ".center").c_str(), &transform_.translate.x, 0.01f);
+	ImGui::Checkbox((static_cast<string>(name) + ".isHit").c_str(), &sphereData_.isHit);
 #endif // _DEBUG
 }
 
@@ -114,9 +109,15 @@ void Sphere::SetColor(uint32_t color) {
 	sphereData_.color = color;
 }
 
-//スフィアの素材のゲッター
-const SphereData& Sphere::GetSphereMaterial()const {
+//スフィアのデータのゲッター
+const SphereData& Sphere::GetSphereData()const {
 	return sphereData_;
+}
+
+//トランスフォームのゲッター
+const Transform& Sphere::GetTransform() const{
+	// TODO: return ステートメントをここに挿入します
+	return transform_;
 }
 
 //平面のセッター
@@ -130,7 +131,7 @@ void Sphere::SetCamera(Camera* camera) {
 }
 
 //球の素材のセッター
-void Sphere::SetSphere(const SphereData& sphereData) {
+void Sphere::SetSphereData(const SphereData& sphereData) {
 	sphereData_ = sphereData;
 }
 

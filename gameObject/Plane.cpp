@@ -64,7 +64,7 @@ void Plane::Draw() {
 }
 
 //平面のデータのゲッター
-const PlaneData& Plane::GetPlaneMaterial() {
+const PlaneData& Plane::GetPlaneData() {
 	// TODO: return ステートメントをここに挿入します
 	return planeData_;
 }

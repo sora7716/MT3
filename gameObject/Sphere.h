@@ -56,10 +56,16 @@ public://メンバ関数
 	void SetColor(uint32_t color);
 
 	/// <summary>
-	/// スフィアの素材のゲッター
+	/// スフィアのデータのゲッター
 	/// </summary>
 	/// <returns></returns>
-	const SphereData& GetSphereMaterial()const;
+	const SphereData& GetSphereData()const;
+
+	/// <summary>
+	/// トランスフォームのゲッター
+	/// </summary>
+	/// <returns>トランスフォーム</returns>
+	const Transform& GetTransform()const;
 
 	/// <summary>
 	/// 平面のセッター
@@ -77,7 +83,7 @@ public://メンバ関数
 	/// 球の素材のセッター
 	/// </summary>
 	/// <param name="material">球の素材</param>
-	void SetSphere(const SphereData& sphereData);
+	void SetSphereData(const SphereData& sphereData);
 
 	/// <summary>
 	/// 当たり判定のセッター

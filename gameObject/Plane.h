@@ -48,7 +48,7 @@ public://メンバ関数
 	/// 平面のデータのゲッター
 	/// </summary>
 	/// <returns></returns>
-	const PlaneData& GetPlaneMaterial();
+	const PlaneData& GetPlaneData();
 
 	/// <summary>
 	/// 平面のデータのセッター
