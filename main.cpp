@@ -56,10 +56,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//回転オブジェクトの初期化
 	RotateObject rotateObject = {};
-	rotateObject.center = { 400.0f,400.0f };
-	rotateObject.size = { 200.0f,400.0f };
-	rotateObject.theta = ConversionRadian(270.0f);
-	rotateObject.textureHandle = Novice::LoadTexture("white1x1.png");
+	rotateObject.center = { 400.0f,400.0f };// 中心点
+	rotateObject.size = { 200.0f,100.0f };// オブジェクトの大きさ
+	rotateObject.theta = ConversionRadian(180.0f);// 回転角度（ラジアン）
+	rotateObject.textureHandle = Novice::LoadTexture("white1x1.png");// テクスチャの読み込み
 
 	//初期の頂点座標の初期化
 	const Vector2 kVertices[static_cast<int32_t>(kVertxCount)] = {
@@ -87,19 +87,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			isRotate ^= true;
 		}
 
-		if (keys[DIK_W] && !preKeys[DIK_W]) {
-			rotateObject.theta += 0.1f;
-		} else if (keys[DIK_S] && !preKeys[DIK_S]) {
-			rotateObject.theta -= 0.1f;
-		}
-		Novice::ScreenPrintf(0, 20, "theta:%f", rotateObject.theta);
-
 		//θを動かす
 		if (isRotate) {
 			rotateObject.theta += 1.0f / 15.0f * float(M_PI);
 		}
 
+		//回転の処理
 		for (int32_t i = 0; i < static_cast<int32_t>(kVertxCount); i++) {
+			//回転
 			rotateObject.rotateVertices[i].x = kVertices[i].x * cosf(rotateObject.theta) - kVertices[i].y * sinf(rotateObject.theta);
 			rotateObject.rotateVertices[i].y = kVertices[i].y * cosf(rotateObject.theta) + kVertices[i].x * sinf(rotateObject.theta);
 
