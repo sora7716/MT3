@@ -1,12 +1,45 @@
 #include <Novice.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-const char kWindowTitle[] = "GC1D 01 イイヅカ　ソラ";
+#include <cstdint>
+const char kWindowTitle[] = "イイヅカ_ソラ";
 
+//二次元のベクトル
 typedef struct Vector2 {
 	float x;
 	float y;
 }Vector2;
+
+//オブジェクトの大きさ
+typedef struct Size {
+	float width;// 幅
+	float height;// 高さ
+}Size;
+
+//オブジェクトの頂点インデックス
+enum VertexIndex :int32_t {
+	kLeftTop,// 左上
+	kLeftBottom,// 左下
+	kRightTop,// 右上
+	kRightBottom,// 右下
+	kVertxCount// 頂点の数
+};
+
+//回転するオブジェクト
+typedef struct RotateObject {
+	Vector2 center; // 回転の中心点
+	Size size; // オブジェクトの大きさ
+	float theta; // 回転角度（ラジアン）
+	uint32_t textureHandle; // テクスチャのハンドル
+	Vector2 rotateVertices[static_cast<int32_t>(kVertxCount)]; // 回転の頂点座標（左上、右上、左下、右下）
+	Vector2 vertices[static_cast<int32_t>(kVertxCount)]; // 頂点座標（左上、右上、左下、右下）
+}RotateObject;
+
+//弧度法へ変換
+float ConversionRadian(float degree) {
+	// ラジアンを度に変換
+	return degree * static_cast<float>(M_PI) / 180.0f;
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -18,57 +51,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	//テクスチャ
-	int textureHandle = Novice::LoadTexture("white1x1.png");
-
-	//中心点
-	float centerPosX = 400;
-	float centerPosY = 400;
-	float width = 200;
-	float height = 100;
-
-	//初期地点
-	const float kLeftTopX = -width / 2.0f;
-	const float kLeftTopY = -height / 2.0f;
-
-	const float kLeftBottomX = -width / 2.0f;
-	const float kLeftBottomY = height / 2.0f;
-
-	const float kRightTopX = width / 2.0f;
-	const float kRightTopY = -height / 2.0f;
-
-	const float kRightBottomX = width / 2.0f;
-	const float kRightBottomY = height / 2.0f;
-
-	//回転
-	float theta = float(M_PI);
-	float leftTopRotateX = 0.0f;
-	float leftTopRotateY = 0.0f;
-
-	float leftBottomRotateX = 0.0f;
-	float leftBottomRotateY = 0.0f;
-
-	float rightTopRotateX = 0.0f;
-	float rightTopRotateY = 0.0f;
-
-	float rightBottomRotateX = 0.0f;
-	float rightBottomRotateY = 0.0f;
-
-	//元の位置に戻す
-	float leftTopPosX = 0.0f;
-	float leftTopPosY = 0.0f;
-
-	float leftBottomPosX = 0.0f;
-	float leftBottomPosY =0.0f;
-
-	float rightTopPosX = 0.0f;
-	float rightTopPosY = 0.0f;
-
-	float rightBottomPosX = 0.0f;
-	float rightBottomPosY = 0.0f;
-
-	//開店するかのフラグ
+	//回転するかのフラグ
 	bool isRotate = false;
+
+	//回転オブジェクトの初期化
+	RotateObject rotateObject = {};
+	rotateObject.center = { 400.0f,400.0f };
+	rotateObject.size = { 200.0f,400.0f };
+	rotateObject.theta = ConversionRadian(270.0f);
+	rotateObject.textureHandle = Novice::LoadTexture("white1x1.png");
+
+	//初期の頂点座標の初期化
+	const Vector2 kVertices[static_cast<int32_t>(kVertxCount)] = {
+		{-rotateObject.size.width / 2.0f,-rotateObject.size.height / 2.0f},
+		{-rotateObject.size.width / 2.0f,rotateObject.size.height / 2.0f},
+		{rotateObject.size.width / 2.0f,-rotateObject.size.height / 2.0f},
+		{rotateObject.size.width / 2.0f,rotateObject.size.height / 2.0f},
+	};
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -88,36 +87,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			isRotate ^= true;
 		}
 
+		if (keys[DIK_W] && !preKeys[DIK_W]) {
+			rotateObject.theta += 0.1f;
+		} else if (keys[DIK_S] && !preKeys[DIK_S]) {
+			rotateObject.theta -= 0.1f;
+		}
+		Novice::ScreenPrintf(0, 20, "theta:%f", rotateObject.theta);
+
 		//θを動かす
 		if (isRotate) {
-			theta += 1.0f / 15.0f * float(M_PI);
+			rotateObject.theta += 1.0f / 15.0f * float(M_PI);
 		}
 
-		//加法定理して回転させる
-		leftTopRotateX = kLeftTopX * cosf(theta) - kLeftTopY * sinf(theta);
-		leftTopRotateY = kLeftTopY * cosf(theta) + kLeftTopX * sinf(theta);
+		for (int32_t i = 0; i < static_cast<int32_t>(kVertxCount); i++) {
+			rotateObject.rotateVertices[i].x = kVertices[i].x * cosf(rotateObject.theta) - kVertices[i].y * sinf(rotateObject.theta);
+			rotateObject.rotateVertices[i].y = kVertices[i].y * cosf(rotateObject.theta) + kVertices[i].x * sinf(rotateObject.theta);
 
-		leftBottomRotateX = kLeftBottomX * cosf(theta) - kLeftBottomY * sinf(theta);
-		leftBottomRotateY = kLeftBottomY * cosf(theta) + kLeftBottomX * sinf(theta);
-
-		rightTopRotateX = kRightTopX * cosf(theta) - kRightTopY * sinf(theta);
-		rightTopRotateY = kRightTopY * cosf(theta) + kRightTopX * sinf(theta);
-
-		rightBottomRotateX = kRightBottomX * cosf(theta) - kRightBottomY * sinf(theta);
-		rightBottomRotateY = kRightBottomY * cosf(theta) + kRightBottomX * sinf(theta);
-
-		//回転の中心を動かす
-		leftTopPosX = leftTopRotateX + centerPosX;
-		leftTopPosY = leftTopRotateY + centerPosY;
-
-		leftBottomPosX = leftBottomRotateX + centerPosX;
-		leftBottomPosY = leftBottomRotateY + centerPosY;
-
-		rightTopPosX = rightTopRotateX + centerPosX;
-		rightTopPosY = rightTopRotateY + centerPosY;
-
-		rightBottomPosX = rightBottomRotateX + centerPosX;
-		rightBottomPosY = rightBottomRotateY + centerPosY;
+			//回転の中心を動かす
+			rotateObject.vertices[i].x = rotateObject.rotateVertices[i].x + rotateObject.center.x;
+			rotateObject.vertices[i].y = rotateObject.rotateVertices[i].y + rotateObject.center.y;
+		}
 
 		///
 		/// ↑更新処理ここまで
@@ -126,17 +115,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓描画処理ここから
 		/// 
-		
+
 		//回転しているか
 		Novice::ScreenPrintf(0, 0, "isRotate:%s", isRotate ? "true" : "false");
-		
+
 		//白いボックス
 		Novice::DrawQuad(
-			static_cast<int>(leftTopPosX), static_cast<int>(leftTopPosY),
-			static_cast<int>(rightTopPosX), static_cast<int>(rightTopPosY),
-			static_cast<int>(leftBottomPosX), static_cast<int>(leftBottomPosY),
-			static_cast<int>(rightBottomPosX), static_cast<int>(rightBottomPosY),
-			0, 0, 1, 1, textureHandle, WHITE
+			static_cast<int>(rotateObject.vertices[kLeftTop].x), static_cast<int>(rotateObject.vertices[kLeftTop].y),
+			static_cast<int>(rotateObject.vertices[kRightTop].x), static_cast<int>(rotateObject.vertices[kRightTop].y),
+			static_cast<int>(rotateObject.vertices[kLeftBottom].x), static_cast<int>(rotateObject.vertices[kLeftBottom].y),
+			static_cast<int>(rotateObject.vertices[kRightBottom].x), static_cast<int>(rotateObject.vertices[kRightBottom].y),
+			0, 0, 1, 1, rotateObject.textureHandle, WHITE
 		);
 
 		///
