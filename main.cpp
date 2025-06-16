@@ -51,15 +51,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//ベクトル
 	Vector2 vector = { 300,200 };
+
 	//回転
-	float theta = 0;
+	float theta = 0.0f;
 	Vector2 rotation = {};
+
 	//ポジションA
 	Vector2 centerPos = { 600.0f,400.0f };
+
 	//ポジションB
 	Vector2 topPos = {};
 	float scaleSpeed = 0.01f;
-	float scale = 0.0f;
+	float scale = 1.0f;
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -74,15 +77,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
-		//スカラー倍
+		//スケール加算
 		scale += scaleSpeed;
 
 		//0.5～2.0の範囲に収める
-		if (scale <= 0.5f) {
-			scale = 0.5f; // 確実に境界値に設定
-			scaleSpeed *= -1;
-		} else if (scale > 2.0f) {
-			scale = 2.0f; // 確実に境界値に設定
+		if (scale <= 0.5f || scale > 2.0f) {
 			scaleSpeed *= -1;
 		}
 
