@@ -27,11 +27,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//球
 	std::unique_ptr<Sphere> sphere = std::make_unique<Sphere>();
-	SphereData sphreData;
-	sphreData.center = { 0.0f,0.0f,0.0f };
-	sphreData.radius = 0.5f;
-	sphreData.color = WHITE;
-	sphere->Initialize(camera.get(), std::move(sphreData));
+	SphereData sphereData;
+	sphereData.center = { 0.0f,0.0f,0.0f };
+	sphereData.radius = 1.0f;
+	sphereData.color = WHITE;
+	sphere->Initialize(camera.get(), std::move(sphereData));
 
 	//平面
 	std::unique_ptr<Plane> plane = std::make_unique<Plane>();

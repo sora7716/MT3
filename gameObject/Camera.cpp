@@ -89,7 +89,7 @@ Vector3 Camera::GetTranslate() {
 //レンダリングパイプライン
 void Camera::RenderingPipeline() {
 	//カメラ座標系
-	cameraMatrix_ = Rendering::MakeSTRMatrix(scale_, rotate_, translate_);
+	cameraMatrix_ = Rendering::MakeAffineMatrix(scale_, rotate_, translate_);
 	//ビュー座標系
 	viewMatrix_ = ~cameraMatrix_;
 	//同次クリップ座標系
