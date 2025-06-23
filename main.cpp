@@ -1,6 +1,6 @@
 #include <Novice.h>
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include <cmath>
+#include <numbers>
 
 const char kWindowTitle[] = "GC1D 01 イイヅカ　ソラ";
 
@@ -68,6 +68,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float scaleSpeed = 0.01f;
 	float scale = 1.0f;
 
+	//円周率
+	float pi = std::numbers::pi_v<float>;
+	//一周(360度)
+	float towPi = 2.0f * pi;
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -84,10 +89,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//スケール加算
 		scaleSpeed += 1.0f / 240.0f;
 		//0.5～2.0の範囲に収める
-		scale = (sinf((2.0f * static_cast<float>(M_PI)) * scaleSpeed) * 0.5f + 0.5f) * (kVectorMax - kVectorMin) + kVectorMin;
+		scale = (std::sin(towPi * scaleSpeed) * 0.5f + 0.5f) * (kVectorMax - kVectorMin) + kVectorMin;
 
 		//回転
-		theta -= 1.0f / 120.0f * float(M_PI);
+		theta -= 1.0f / 120.0f * pi;
 		rotation.x = vector.x * cosf(theta) - vector.y * sinf(theta);
 		rotation.y = vector.y * cosf(theta) + vector.x * sinf(theta);
 
