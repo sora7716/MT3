@@ -84,7 +84,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//スケール加算
 		scaleSpeed += 1.0f / 240.0f;
 		//0.5～2.0の範囲に収める
-		scale = (sinf(2.0f * static_cast<float>(M_PI) * scaleSpeed) * 0.5f + 0.5f) * (kVectorMax - kVectorMin) + kVectorMin;
+		scale = (sinf((2.0f * static_cast<float>(M_PI)) * scaleSpeed) * 0.5f + 0.5f) * (kVectorMax - kVectorMin) + kVectorMin;
 
 		//回転
 		theta -= 1.0f / 120.0f * float(M_PI);
