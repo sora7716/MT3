@@ -93,8 +93,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//回転
 		theta -= 1.0f / 120.0f * pi;
-		rotation.x = vector.x * cosf(theta) - vector.y * sinf(theta);
-		rotation.y = vector.y * cosf(theta) + vector.x * sinf(theta);
+		rotation.x = vector.x * std::cos(theta) - vector.y * std::sin(theta);
+		rotation.y = vector.y * std::cos(theta) + vector.x * std::sin(theta);
 
 		//元の位置に戻す
 		topPos = centerPos + scale * rotation;
