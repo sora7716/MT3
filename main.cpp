@@ -8,6 +8,21 @@ const char kWindowTitle[] = "イイヅカ_ソラ";
 typedef struct Vector2 {
 	float x;
 	float y;
+
+	//加法
+	Vector2 operator+(const Vector2& v) {
+		return { x + v.x, y + v.y };
+	}
+
+	//減法
+	Vector2 operator-(const Vector2& v) {
+		return { x - v.x, y - v.y };
+	}
+
+	//除法(float)
+	Vector2 operator/(float n) {
+		return { x / n, y / n };
+	}
 }Vector2;
 
 //オブジェクトの大きさ
@@ -18,9 +33,9 @@ typedef struct Size {
 
 //オブジェクトの頂点インデックス
 enum VertexIndex :int32_t {
-	kLeft, //左
-	kTop,//上
-	kRight,//右
+	kLeft,
+	kTop,
+	kRight,
 	kVertxCount// 頂点の数
 };
 
@@ -56,18 +71,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//回転オブジェクトの初期化
 	RotateObject rotateObject = {};
 	rotateObject.center = { 400.0f,400.0f };// 中心点
-	rotateObject.size = { 200.0f,100.0f };// オブジェクトの大きさ
-	rotateObject.theta = ConversionRadian(180.0f);// 回転角度（ラジアン）
+	rotateObject.size = { 100.0f,100.0f };// オブジェクトの大きさ
+	rotateObject.theta = ConversionRadian(0.0f);// 回転角度（ラジアン）
 	rotateObject.textureHandle = Novice::LoadTexture("white1x1.png");// テクスチャの読み込み
 
 	//初期の頂点座標の初期化
-	const Vector2 kVertices[static_cast<int32_t>(kVertxCount)] = {
-		{-rotateObject.size.width / 2.0f,-rotateObject.size.height / 2.0f},
+	Vector2 kVertices[static_cast<int32_t>(kVertxCount)] = {
 		{-rotateObject.size.width / 2.0f,rotateObject.size.height / 2.0f},
-		{rotateObject.size.width / 2.0f,-rotateObject.size.height / 2.0f},
+		{0.0f,-rotateObject.size.height / 2.0f},
 		{rotateObject.size.width / 2.0f,rotateObject.size.height / 2.0f},
 	};
 
+	//三角形の重心
+	Vector2 centroid = {
+		(kVertices[static_cast<int>(kLeft)] + kVertices[static_cast<int>(kTop)] + kVertices[static_cast<int>(kRight)]) / 3.0f
+	};
+
+	//重心を中心にするための頂点座標の初期化
+	Vector2 localVertices[static_cast<int32_t>(kVertxCount)] = {
+		{kVertices[static_cast<int>(kLeft)] - centroid},
+		{kVertices[static_cast<int>(kTop)] - centroid},
+		{kVertices[static_cast<int>(kRight)] - centroid},
+	};
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -88,14 +113,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//θを動かす
 		if (isRotate) {
-			rotateObject.theta += 1.0f / 15.0f * float(M_PI);
+			rotateObject.theta += 1.0f / 120.0f * float(M_PI);
 		}
 
 		//回転の処理
 		for (int32_t i = 0; i < static_cast<int32_t>(kVertxCount); i++) {
 			//回転
-			rotateObject.rotateVertices[i].x = kVertices[i].x * cosf(rotateObject.theta) - kVertices[i].y * sinf(rotateObject.theta);
-			rotateObject.rotateVertices[i].y = kVertices[i].y * cosf(rotateObject.theta) + kVertices[i].x * sinf(rotateObject.theta);
+			rotateObject.rotateVertices[i].x = localVertices[i].x * cosf(rotateObject.theta) - localVertices[i].y * sinf(rotateObject.theta);
+			rotateObject.rotateVertices[i].y = localVertices[i].y * cosf(rotateObject.theta) + localVertices[i].x * sinf(rotateObject.theta);
 
 			//回転の中心を動かす
 			rotateObject.vertices[i].x = rotateObject.rotateVertices[i].x + rotateObject.center.x;
@@ -113,13 +138,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//回転しているか
 		Novice::ScreenPrintf(0, 0, "isRotate:%s", isRotate ? "true" : "false");
 
-		//白いボックス
-		Novice::DrawQuad(
-			static_cast<int>(rotateObject.vertices[kLeftTop].x), static_cast<int>(rotateObject.vertices[kLeftTop].y),
-			static_cast<int>(rotateObject.vertices[kRightTop].x), static_cast<int>(rotateObject.vertices[kRightTop].y),
-			static_cast<int>(rotateObject.vertices[kLeftBottom].x), static_cast<int>(rotateObject.vertices[kLeftBottom].y),
-			static_cast<int>(rotateObject.vertices[kRightBottom].x), static_cast<int>(rotateObject.vertices[kRightBottom].y),
-			0, 0, 1, 1, rotateObject.textureHandle, WHITE
+		//白い三角形
+		Novice::DrawTriangle(
+			static_cast<int>(rotateObject.vertices[kLeft].x), static_cast<int>(rotateObject.vertices[kLeft].y),
+			static_cast<int>(rotateObject.vertices[kTop].x), static_cast<int>(rotateObject.vertices[kTop].y),
+			static_cast<int>(rotateObject.vertices[kRight].x), static_cast<int>(rotateObject.vertices[kRight].y),
+			WHITE, kFillModeSolid
 		);
 
 		///
