@@ -44,7 +44,6 @@ typedef struct RotateObject {
 	Vector2 center; // 回転の中心点
 	Size size; // オブジェクトの大きさ
 	float theta; // 回転角度（ラジアン）
-	uint32_t textureHandle; // テクスチャのハンドル
 	Vector2 rotateVertices[static_cast<int32_t>(kVertxCount)]; // 回転の頂点座標（左上、右上、左下、右下）
 	Vector2 vertices[static_cast<int32_t>(kVertxCount)]; // 頂点座標（左上、右上、左下、右下）
 }RotateObject;
@@ -73,7 +72,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rotateObject.center = { 400.0f,400.0f };// 中心点
 	rotateObject.size = { 100.0f,100.0f };// オブジェクトの大きさ
 	rotateObject.theta = ConversionRadian(0.0f);// 回転角度（ラジアン）
-	rotateObject.textureHandle = Novice::LoadTexture("white1x1.png");// テクスチャの読み込み
 
 	//初期の頂点座標の初期化
 	Vector2 kVertices[static_cast<int32_t>(kVertxCount)] = {
