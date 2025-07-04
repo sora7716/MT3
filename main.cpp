@@ -56,15 +56,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//回転オブジェクトの初期化
 	RotateObject rotateObject = {};
 	rotateObject.center = { 400.0f,400.0f };// 中心点
-	rotateObject.size = { 200.0f,100.0f };// オブジェクトの大きさ
-	rotateObject.theta = ConversionRadian(180.0f);// 回転角度（ラジアン）
+	rotateObject.size = { 100.0f,100.0f };// オブジェクトの大きさ
+	rotateObject.theta = ConversionRadian(0.0f);// 回転角度（ラジアン）
 	rotateObject.textureHandle = Novice::LoadTexture("white1x1.png");// テクスチャの読み込み
 
 	//初期の頂点座標の初期化
 	const Vector2 kVertices[static_cast<int32_t>(kVertxCount)] = {
-		{-rotateObject.size.width / 2.0f,-rotateObject.size.height / 2.0f},
 		{-rotateObject.size.width / 2.0f,rotateObject.size.height / 2.0f},
-		{rotateObject.size.width / 2.0f,-rotateObject.size.height / 2.0f},
+		{0.0f,-rotateObject.size.height/2.0f},
 		{rotateObject.size.width / 2.0f,rotateObject.size.height / 2.0f},
 	};
 
@@ -114,12 +113,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Novice::ScreenPrintf(0, 0, "isRotate:%s", isRotate ? "true" : "false");
 
 		//白いボックス
-		Novice::DrawQuad(
-			static_cast<int>(rotateObject.vertices[kLeftTop].x), static_cast<int>(rotateObject.vertices[kLeftTop].y),
-			static_cast<int>(rotateObject.vertices[kRightTop].x), static_cast<int>(rotateObject.vertices[kRightTop].y),
-			static_cast<int>(rotateObject.vertices[kLeftBottom].x), static_cast<int>(rotateObject.vertices[kLeftBottom].y),
-			static_cast<int>(rotateObject.vertices[kRightBottom].x), static_cast<int>(rotateObject.vertices[kRightBottom].y),
-			0, 0, 1, 1, rotateObject.textureHandle, WHITE
+		Novice::DrawTriangle(
+			static_cast<int>(rotateObject.vertices[kLeft].x), static_cast<int>(rotateObject.vertices[kLeft].y),
+			static_cast<int>(rotateObject.vertices[kTop].x), static_cast<int>(rotateObject.vertices[kTop].y),
+			static_cast<int>(rotateObject.vertices[kRight].x), static_cast<int>(rotateObject.vertices[kRight].y),
+			WHITE, kFillModeSolid
 		);
 
 		///
