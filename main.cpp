@@ -19,11 +19,6 @@ typedef struct Vector2 {
 		};
 		return result;
 	}
-	Vector2& operator+=(const Vector2& v) {
-		this->x += v.x;
-		this->y += v.y;
-		return *this;
-	}
 
 	Vector2 operator*(float num) {
 		Vector2 result{
@@ -31,6 +26,12 @@ typedef struct Vector2 {
 			y * num,
 		};
 		return result;
+	}
+
+	Vector2& operator/=(float num) {
+		this->x /= num;
+		this->y /= num;
+		return *this;
 	}
 }Vector2;
 
@@ -43,6 +44,22 @@ Vector2 operator*(float num, const Vector2& v) {
 	return result;
 }
 
+enum TriangleVertex {
+	kLeft,
+	kTop,
+	kRight,
+	kTriangleVertexCount,
+};
+
+//回転するオブジェクト
+typedef struct RotateObject {
+	Vector2 center; // 中心座標
+	Vector2 rotateObjectCenter; // 回転オブジェクトの中心
+	Vector2 rotateVector; //回転ベクトル
+	Vector2 localPosition[static_cast<int>(kTriangleVertexCount)]; // 画面上の位置
+	Vector2 screenPosition[static_cast<int>(kTriangleVertexCount)]; // 画面上の位置
+}RotateObject;
+
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -53,26 +70,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	//ベクトル
-	Vector2 vector = { 300,200 };
-
 	//回転
 	float theta = 0.0f;
-	Vector2 rotation = {};
-
-	//ポジションA
-	Vector2 centerPos = { 600.0f,400.0f };
-
-	//ポジションB
-	Vector2 topPos = {};
-	float scaleSpeed = 0.01f;
-	float scale = 1.0f;
-
 	//円周率
 	float pi = std::numbers::pi_v<float>;
-	//一周(360度)
-	float towPi = 2.0f * pi;
 
+	RotateObject rotateObject = {};
+	rotateObject.center = { 640.0f, 360.0f }; // 中心座標
+	rotateObject.localPosition[static_cast<int>(kLeft)] = { -100.0f, 0.0f }; // 左頂点のローカル座標
+	rotateObject.localPosition[static_cast<int>(kTop)] = { 0.0f, -100.0f }; // 上頂点のローカル座標
+	rotateObject.localPosition[static_cast<int>(kRight)] = { 100.0f, 0.0f }; // 右頂点のローカル座標
+	rotateObject.rotateVector = { 200.0f, 200.0f }; // 回転ベクトル（上方向）
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -86,19 +94,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
-		//スケール加算
-		scaleSpeed += 1.0f / 240.0f;
-		//0.5～2.0の範囲に収める
-		scale = (std::sin(towPi * scaleSpeed) * 0.5f + 0.5f) * (kVectorMax - kVectorMin) + kVectorMin;
 
 		//回転
 		theta -= 1.0f / 120.0f * pi;
-		rotation.x = vector.x * std::cos(theta) - vector.y * std::sin(theta);
-		rotation.y = vector.y * std::cos(theta) + vector.x * std::sin(theta);
+		rotateObject.rotateObjectCenter = {};
+		for (int i = 0; i < 3; i++) {
+			rotateObject.rotateObjectCenter.x += rotateObject.localPosition[i].x;
+			rotateObject.rotateObjectCenter.y += rotateObject.localPosition[i].y;
+		}
+		rotateObject.rotateObjectCenter /= 3.0f;
 
-		//元の位置に戻す
-		topPos = centerPos + scale * rotation;
+		rotateObject.rotateObjectCenter.x -= rotateObject.center.x;
+		rotateObject.rotateObjectCenter.y -= rotateObject.center.y;
 
+		for (int i = 0; i < 3; i++) {
+			rotateObject.screenPosition[i].x = rotateObject.rotateObjectCenter.x * std::cos(theta) - rotateObject.rotateObjectCenter.y * std::sin(theta);
+			rotateObject.screenPosition[i].y = rotateObject.rotateObjectCenter.y * std::cos(theta) + rotateObject.rotateObjectCenter.x * std::sin(theta);
+
+			// 回転後の座標に重心と画面中心を足す
+			rotateObject.screenPosition[i] = {
+				rotated.x + rotateObject.rotateObjectCenter.x + rotateObject.center.x,
+				rotated.y + rotateObject.rotateObjectCenter.y + rotateObject.center.y
+			};
+		}
+		rotateObject.screenPosition[static_cast<int>(kLeft)].x += -100.0f;
+		rotateObject.screenPosition[static_cast<int>(kTop)].y += -100.0f;
+		rotateObject.screenPosition[static_cast<int>(kRight)].x += 100.0f;
+
+		Novice::ScreenPrintf(0, 0, "theta:%f", theta);
 		///
 		/// ↑更新処理ここまで
 		///
@@ -106,7 +129,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓描画処理ここから
 		///
-		Novice::DrawLine((int)centerPos.x, (int)centerPos.y, (int)topPos.x, (int)topPos.y, WHITE);
+
+		Novice::DrawTriangle(
+			static_cast<int>(rotateObject.screenPosition[static_cast<int>(kLeft)].x),
+			static_cast<int>(rotateObject.screenPosition[static_cast<int>(kLeft)].y),
+			static_cast<int>(rotateObject.screenPosition[static_cast<int>(kTop)].x),
+			static_cast<int>(rotateObject.screenPosition[static_cast<int>(kTop)].y),
+			static_cast<int>(rotateObject.screenPosition[static_cast<int>(kRight)].x),
+			static_cast<int>(rotateObject.screenPosition[static_cast<int>(kRight)].y),
+			WHITE, kFillModeSolid
+		);
+
 		///
 		/// ↑描画処理ここまで
 		///
