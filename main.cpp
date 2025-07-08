@@ -1,13 +1,7 @@
 #include <Novice.h>
-#include <cstdint>
-#include <imgui.h>
-
-const char kWindowTitle[] = "Blend";
-//画面のサイズ
-const float kWindowWidth = 1280.0f;//ウィンドウの幅
-const float kWindowHeight = 720.0f;//ウィンドウの高さ
-//スプライトのサイズ
-const float kSpriteSize = 600.0f;//スプライトの幅
+#include <stdlib.h>
+#include <time.h>
+const char kWindowTitle[] = "GC1A_01_イイヅカ_ソラ_タイトル";
 
 //2次元のベクトル
 typedef struct Vector2 {
@@ -15,78 +9,60 @@ typedef struct Vector2 {
 	float y;
 }Vector2;
 
-//2次元のベクトルInt
+//サイズ
+typedef struct Size {
+	float width;
+	float height;
+}Size;
+
+//2次元の整数ベクトル
 typedef struct Vector2Int {
 	int x;
 	int y;
 }Vector2Int;
 
-//4次元のベクトル
-typedef struct Vector4 {
-	float x;
-	float y;
-	float z;
-	float w;
-}Vector4;
+//パーティクルのデータ
+typedef struct ParticleData {
+	Vector2 position;
+	Vector2 velocity;
+	Vector2 acceleration;
+	int radius;
+	Vector2Int random;
+	bool isAlive;
+}ParticleData;
 
-/// <summary>
-/// 正規化された値をunsigned intに変換
-/// </summary>
-/// <param name="normal">正規化された値</param>
-/// <returns></returns>
-unsigned int NormalizeColorByte(float normal) {
-	int result = 0;
-	if (normal < 0.0f) {
-		result = 0;
-	} else if (normal >= 1.0f) {
-		result = 255;
-	}
-	result = static_cast<int>(normal * 255.0f);
-	return result;
-}
-
-/// <summary>
-/// Vector4をカラーコードに変換
-/// </summary>
-/// <param name="color">カラー</param>
-/// <returns>カラーコード</returns>
-unsigned int ColorCodeFromVector4(const Vector4& color) {
-	int r = NormalizeColorByte(color.x);
-	int g = NormalizeColorByte(color.y);
-	int b = NormalizeColorByte(color.z);
-	int a = NormalizeColorByte(color.w);
-	return (r << 24) | (g << 16) | (b << 8) | a;
-}
-
+const int PARTICLE_NUM = 300;
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ライブラリの初期化
-	Novice::Initialize(kWindowTitle, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight));
+	Novice::Initialize(kWindowTitle, 600, 400);
 
 	// キー入力結果を受け取る箱
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	//スプライトのロード
-	int particle = Novice::LoadTexture("./particle.png");
+	//パーティクルの変数↓
+	ParticleData particle[PARTICLE_NUM] = { 0 };
+	for (int i = 0; i < PARTICLE_NUM; i++) {
+		particle[i].position = { 0,0 };
+		particle[i].velocity = { 0,0 };
+		particle[i].acceleration = { -0.3f,0.3f };
+		particle[i].radius = 0;
+		particle[i].random = { 0,0 };
+		particle[i].isAlive = false;
+	}
+	//パーティクルの変数↑
 
 	//マウスの座標
-	Vector2Int mousePos = { 0, 0 };
+	Vector2Int mousePos = {};
+	//ボックスのサイズ
+	Size emitSize{
+		50,50
+	};
+	//ランド関数に使う
+	srand((unsigned int)time(nullptr));
 
-	//真ん中のスプライトの座標
-	Vector2 particlePos[3];
-	for (int32_t i = 0; i < 3; i++) {
-		particlePos[i] = {kWindowWidth / 2.0f - (100 * static_cast<float>(i * 2 + 1)),kWindowHeight / 2.0f - 300 };
-	}
-
-	//ブレンドモード
-	BlendMode blend = BlendMode::kBlendModeNone;
-
-	//カラー(Vector4)
-	Vector4 color4 = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//カラー
-	unsigned int color = WHITE;
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -100,18 +76,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-		
-		ImGui::Begin("Debug Blend");
-		const char* blendModes[] = { "None", "Normal", "Add", "Subtract" };
-		int blendIndex = static_cast<int>(blend);
-		if (ImGui::Combo("BlendMode", &blendIndex, blendModes, IM_ARRAYSIZE(blendModes))) {
-			// blendIndexが変更されたらBlendModeに変換して反映
-			blend = static_cast<BlendMode>(blendIndex);
+		//ボックスの横幅変更
+		if (keys[DIK_A] && emitSize.width > 10) {
+			emitSize.width--;
+		} else if (keys[DIK_D]) {
+			emitSize.width++;
 		}
-		ImGui::ColorEdit4("color", &color4.x);
-		color = ColorCodeFromVector4(color4);
-		ImGui::End();
-		
+
+		//ボックスの縦幅変更
+		if (keys[DIK_S] && emitSize.height > 10) {
+			emitSize.height--;
+		} else if (keys[DIK_W]) {
+			emitSize.height++;
+		}
+
+		//パーティクルの召喚
+		for (int i = 0; i < PARTICLE_NUM; i++) {
+			if (!particle[i].isAlive) {
+				particle[i].isAlive = true;
+				particle[i].random.x = rand() % (int)emitSize.width + mouseX - (int)emitSize.width / 2;
+				particle[i].random.y = rand() % (int)emitSize.height + mouseY - (int)emitSize.height / 2;
+				particle[i].radius = rand() % 8 + 3;
+				particle[i].position = { (float)particle[i].random.x,(float)particle[i].random.y };
+				break;
+			}
+		}
+
+		//パーティクルの動き
+		for (int i = 0; i < PARTICLE_NUM; i++) {
+			if (particle[i].isAlive) {
+				particle[i].velocity.y += particle[i].acceleration.y;
+				particle[i].position.y += particle[i].velocity.y;
+			}
+			if (particle[i].position.y >= 720) {
+				particle[i].isAlive = false;
+				particle[i].position = { 0,0 };
+				particle[i].velocity = { 0,0 };
+			}
+		}
 		///
 		/// ↑更新処理ここまで
 		///
@@ -120,25 +122,29 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		//ブレンドしたくない↓
-		Novice::SetBlendMode(BlendMode::kBlendModeNone);
 		//背景
-		Novice::DrawBox(0, 0, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight), 0.0f, BLACK, kFillModeSolid);
-		//縦のライン
-		Novice::DrawLine(static_cast<int32_t>(kWindowWidth/2.0f), 0, static_cast<int32_t>(kWindowWidth / 2.0f), static_cast<int32_t>(kWindowHeight), WHITE);
-		//横のライン
-		Novice::DrawLine(0, static_cast<int32_t>(kWindowHeight/2.0f), static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight/2.0f), WHITE);
-		//ブレンドしたくない↑
+		Novice::DrawBox(0, 0, 600, 400, 0.0f, BLACK, kFillModeSolid);
 
-		//ブレンドしたい↓
-		Novice::SetBlendMode(blend);
-		//マウス
-		Novice::DrawSprite(mousePos.x - static_cast<int32_t>(kSpriteSize/2.0f), mousePos.y - static_cast<int32_t>(kSpriteSize / 2.0f), particle, 1, 1, 0.0f, color);
-		//真ん中のスプライト
-		for (int i = 0; i < 3; i++){
-			Novice::DrawSprite((int)particlePos[i].x, (int)particlePos[i].y, particle, 1, 1, 0.0f, color);
+		//横のライン
+		Novice::DrawLine(0, 200, 600, 200, WHITE);
+
+		//縦のライン
+		Novice::DrawLine(300, 0, 300, 400, WHITE);
+
+		//パーティクル
+		for (int i = 0; i < PARTICLE_NUM; i++) {
+			if (particle[i].isAlive) {
+				Novice::DrawEllipse((int)particle[i].position.x, (int)particle[i].position.y, (int)particle[i].radius, particle[i].radius, 0.0f, WHITE, kFillModeSolid);
+			}
 		}
-		//ブレンドしたい↑
+
+		//ボックス
+		Novice::DrawBox(
+			mouseX - (int)emitSize.width / 2,
+			mouseY - (int)emitSize.height / 2,
+			(int)emitSize.width,
+			(int)emitSize.height,
+			0.0f, WHITE, kFillModeWireFrame);
 
 		///
 		/// ↑描画処理ここまで
