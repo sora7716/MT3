@@ -1,84 +1,89 @@
-#include "myMath/func/Easing.h"
 #include <Novice.h>
 #include <cstdint>
 #include <imgui.h>
-const int kAfterImageNum = 700;
 
-// 2次元のベクトル
+const char kWindowTitle[] = "Blend";
+//画面のサイズ
+const float kWindowWidth = 1280.0f;//ウィンドウの幅
+const float kWindowHeight = 720.0f;//ウィンドウの高さ
+//2次元のベクトル
 typedef struct Vector2 {
 	float x;
 	float y;
-} Vector2;
+}Vector2;
 
-// ゲームオブジェクト
-typedef struct GameObject {
-	Vector2 pos; // 位置
-	float size;  // 半径
-} GameObject;
+//2次元のベクトルInt
+typedef struct Vector2Int {
+	int x;
+	int y;
+}Vector2Int;
 
-// 線形補間に必要なもの
-typedef struct LerpData {
-	GameObject gameObject; // ゲームオブジェクト
-	Vector2 beginPos;      // 開始位置
-	Vector2 endPos;        // 終了位置
-} LerpData;
+//4次元のベクトル
+typedef struct Vector4 {
+	float x;
+	float y;
+	float z;
+	float w;
+}Vector4;
 
-const char kWindowTitle[] = "02_02_演出王:イージング";
+/// <summary>
+/// 正規化された値をunsigned intに変換
+/// </summary>
+/// <param name="normal">正規化された値</param>
+/// <returns></returns>
+unsigned int NormalizeColorByte(float normal) {
+	int result = 0;
+	if (normal < 0.0f) {
+		result = 0;
+	} else if (normal >= 1.0f) {
+		result = 255;
+	}
+	result = static_cast<int>(normal * 255.0f);
+	return result;
+}
+
+/// <summary>
+/// Vector4をカラーコードに変換
+/// </summary>
+/// <param name="color">カラー</param>
+/// <returns>カラーコード</returns>
+unsigned int ColorCodeFromVector4(const Vector4& color) {
+	int r = NormalizeColorByte(color.x);
+	int g = NormalizeColorByte(color.y);
+	int b = NormalizeColorByte(color.z);
+	int a = NormalizeColorByte(color.w);
+	return (r << 24) | (g << 16) | (b << 8) | a;
+}
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ライブラリの初期化
-	Novice::Initialize(kWindowTitle, 750, 550);
+	Novice::Initialize(kWindowTitle, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight));
 
 	// キー入力結果を受け取る箱
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	// イージングのラベル
-	const char* easingLabel[static_cast<int32_t>(kEasingTypeCount)] = {
-		"Ease In", "Ease Out", "Ease InOut", "Ease InBack", "Ease OutBack" };
-	// イージングのラベルのダブルポインタ
-	char** pp_easingLabel = const_cast<char**>(easingLabel);
+	//スプライトのロード
+	int particle = Novice::LoadTexture("./particle.png");
 
-	// 線形補間する数
-	LerpData lerpData[static_cast<int32_t>(kEasingTypeCount)] = {};
+	//マウスの座標
+	Vector2Int mousePos = { 0, 0 };
 
-	// 基準
-	Vector2 origin = { 100.0f, 200.0f };
-
-	// イージングの種類ごとの位置を初期化
-	for (int32_t i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-		lerpData[i].gameObject.size = 64.0f; // サイズ設定
-		lerpData[i].gameObject.pos = {
-			origin.x,
-			origin.y + (lerpData[i].gameObject.size * static_cast<float>(i)) }; // 現在地を設定
-		lerpData[i].beginPos = lerpData[i].gameObject.pos;                     // 初期位置を設定
-		lerpData[i].endPos = {
-			origin.x + 500.0f,
-			origin.y + (lerpData[i].gameObject.size * static_cast<float>(i)) }; // 最終位置を設定
+	//真ん中のスプライトの座標
+	Vector2 particlePos[3];
+	for (int32_t i = 0; i < 3; i++) {
+		particlePos[i] = {kWindowWidth / 2.0f - (100 * static_cast<float>(i * 2 + 1)),kWindowHeight / 2.0f - 300 };
 	}
 
-	// インバックだけは開始位置をずらす
-	lerpData[static_cast<int32_t>(kInBack)].beginPos.x = 100.0f;
+	//ブレンドモード
+	BlendMode blend = BlendMode::kBlendModeNone;
 
-	// イージングのインスタンスを生成
-	Easing* easing = new Easing();
-
-	// 動いているかどうか
-	bool isMove = false;
-	// イージングが開始したかどうか
-	bool isEasingStart = false;
-
-	// 最終フレーム
-	float endFrame = 60.0f;
-
-#pragma region 残像
-	float afterImageTimer = 0;
-
-	Vector2 afterImage[static_cast<int32_t>(kEasingTypeCount)][kAfterImageNum] = { 0 };
-	bool isEasingAfter[kAfterImageNum] = { false };
-#pragma endregion
+	//カラー(Vector4)
+	Vector4 color4 = { 1.0f, 1.0f, 1.0f, 1.0f };
+	//カラー
+	unsigned int color = WHITE;
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -87,89 +92,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		// キー入力を受け取る
 		memcpy(preKeys, keys, 256);
 		Novice::GetHitKeyStateAll(keys);
+		Novice::GetMousePosition(&mousePos.x, &mousePos.y);
 
 		///
 		/// ↓更新処理ここから
 		///
-
-		// スペース押すと動き出す
-		if (isEasingStart) {
-			// スペース押されていないなら
-			if (!isMove) {
-				// スペース押された
-				isMove = true;
-				// フレームの初期化
-				easing->SetFrame(0.0f);
-				// エンドフレームのセット
-				easing->SetEndFrame(endFrame);
-				for (int i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-					// 赤いボックスの初期化
-					lerpData[i].gameObject.pos = lerpData[i].beginPos;
-					// 残像を初期化
-					for (int j = 0; j < kAfterImageNum; j++) {
-						// 残像の生存フラグを初期化
-						isEasingAfter[j] = false;
-						// 残像の位置を初期化
-						afterImage[i][j] = lerpData[i].beginPos;
-					}
-				}
-				// イージングの開始フラグを折る
-				isEasingStart = false;
-			}
+		
+		ImGui::Begin("Debug Blend");
+		const char* blendModes[] = { "None", "Normal", "Add", "Subtract" };
+		int blendIndex = static_cast<int>(blend);
+		if (ImGui::Combo("BlendMode", &blendIndex, blendModes, IM_ARRAYSIZE(blendModes))) {
+			// blendIndexが変更されたらBlendModeに変換して反映
+			blend = static_cast<BlendMode>(blendIndex);
 		}
-
-		// フレームの動き
-		if (isMove) {
-			easing->Update();
-		}
-
-		// もしフレームが1になっていれば
-		if (easing->GetFrame() >= easing->GetEndFrame()) {
-			isMove = false;
-		}
-
-		// 残像同士の距離感
-		if (afterImageTimer > 0) {
-			if (isMove) {
-				afterImageTimer--;
-			}
-		} else {
-			afterImageTimer = 1;
-		}
-
-		// 残像の位置
-		if (afterImageTimer <= 0 && isMove) {
-			for (int i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-				for (int j = 0; j < kAfterImageNum; j++) {
-					// もし残像が生成されていなければ
-					if (!isEasingAfter[j]) {
-						// 残像を生成
-						isEasingAfter[j] = true;
-						// 残像の位置を更新
-						afterImage[i][j] = lerpData[i].gameObject.pos;
-						break;
-					}
-				}
-			}
-		}
-
-		// イージングの動き
-		for (int32_t i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-			lerpData[i].gameObject.pos.x =
-				lerpData[i].beginPos.x + (lerpData[i].endPos.x - lerpData[i].beginPos.x) *
-				easing->GetEasing(static_cast<EasingType>(i));
-		}
-
-		ImGui::Begin("Debug Easing");
-		ImGui::Text("Frame:%.1f", easing->GetFrame());
-		ImGui::DragFloat("EndFrame", &endFrame, 0.1f, 0.0f, 180.0f, "%.1f");
-		if (ImGui::Button("Easing On")) {
-			if (!isMove) {
-				isEasingStart ^= true;
-			}
-		}
+		ImGui::ColorEdit4("color", &color4.x);
+		color = ColorCodeFromVector4(color4);
 		ImGui::End();
-
+		
 		///
 		/// ↑更新処理ここまで
 		///
@@ -178,45 +117,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		// 残像
-		for (int32_t i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-			for (int32_t j = 0; j < kAfterImageNum; j++) {
-				if (isEasingAfter[j]) {
-					Novice::DrawBox(
-						static_cast<int32_t>(afterImage[i][j].x),
-						static_cast<int32_t>(afterImage[i][j].y),
-						static_cast<int32_t>(lerpData[i].gameObject.size / 2.0f),
-						static_cast<int32_t>(lerpData[i].gameObject.size / 2.0f), 0.0f,
-						0xC4C4C455,
-						kFillModeSolid);
-				}
-			}
-		}
+		//ブレンドしたくない↓
+		Novice::SetBlendMode(BlendMode::kBlendModeNone);
+		//背景
+		Novice::DrawBox(0, 0, 1280, 720, 0.0f, BLACK, kFillModeSolid);
+		//縦のライン
+		Novice::DrawLine(1280 / 2, 0, 1280 / 2, 720, WHITE);
+		//横のライン
+		Novice::DrawLine(0, 720 / 2, 1280, 720 / 2, WHITE);
+		//ブレンドしたくない↑
 
-		// 赤いボックスの最終地点
-		for (int32_t i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-			Novice::DrawBox(
-				static_cast<int32_t>(lerpData[i].endPos.x),
-				static_cast<int32_t>(lerpData[i].endPos.y),
-				static_cast<int32_t>(lerpData[i].gameObject.size / 2.0f),
-				static_cast<int32_t>(lerpData[i].gameObject.size / 2.0f), 0.0f, 0xFF000055,
-				kFillModeSolid);
+		//ブレンドしたい↓
+		Novice::SetBlendMode(blend);
+		//マウス
+		Novice::DrawSprite(mousePos.x - 300, mousePos.y - 300, particle, 1, 1, 0.0f, color);
+		//真ん中のスプライト
+		for (int i = 0; i < 3; i++)
+		{
+			Novice::DrawSprite((int)particlePos[i].x, (int)particlePos[i].y, particle, 1, 1, 0.0f, color);
 		}
-
-		// 赤いボックスの描画
-		for (int32_t i = 0; i < static_cast<int32_t>(kEasingTypeCount); i++) {
-			Novice::ScreenPrintf(
-				static_cast<int32_t>(lerpData[i].beginPos.x),
-				static_cast<int32_t>(
-					lerpData[i].gameObject.pos.y - (lerpData[i].gameObject.size / 4.0f)),
-				"%s", *(pp_easingLabel + i));
-			Novice::DrawBox(
-				static_cast<int32_t>(lerpData[i].gameObject.pos.x),
-				static_cast<int32_t>(lerpData[i].gameObject.pos.y),
-				static_cast<int32_t>(lerpData[i].gameObject.size / 2.0f),
-				static_cast<int32_t>(lerpData[i].gameObject.size / 2.0f), 0.0f, RED,
-				kFillModeSolid);
-		}
+		//ブレンドしたい↑
 
 		///
 		/// ↑描画処理ここまで
@@ -230,8 +150,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			break;
 		}
 	}
-
-	delete easing;
 
 	// ライブラリの終了
 	Novice::Finalize();

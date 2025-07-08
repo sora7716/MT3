@@ -16,7 +16,7 @@
     <ProjectGuid>{dc86b75a-729c-4bfe-9d58-202f3ea09031}</ProjectGuid>
     <RootNamespace>MT</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>AL2_Easing</ProjectName>
+    <ProjectName>AL2_Blend</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
