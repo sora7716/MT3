@@ -9,6 +9,13 @@ const char kWindowTitle[] = "Particle";
 typedef struct Vector2 {
 	float x;
 	float y;
+
+	//加算(+=)
+	const Vector2& operator+=(const Vector2& v) {
+		this->x += v.x;
+		this->y += v.y;
+		return *this;
+	}
 }Vector2;
 
 //サイズ
@@ -89,6 +96,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("Debug Particle");
 		ImGui::DragFloat2("EmitterSize", &emitSize.width, 0.1f, 1.0f, 1000.0f, "%.1f");
 		ImGui::DragFloat2("ParticleAcceleration", &particleAcceleration.x, 0.1f, -10.0f, 10.0f, "%.1f");
+		if (ImGui::Button("Reset")) {
+			for (int32_t i = 0; i < kParticleNum; i++) {
+				particle[i].isAlive = false;
+				particle[i].position = { 0,0 };
+				particle[i].velocity = { 0,0 };
+			}
+		}
 		ImGui::End();
 
 		//パーティクルの召喚
@@ -116,10 +130,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//パーティクルの動き
 		for (int32_t i = 0; i < kParticleNum; i++) {
 			if (particle[i].isAlive) {
-				particle[i].velocity.y += particle[i].acceleration.y;
-				particle[i].position.y += particle[i].velocity.y;
+				particle[i].velocity += particle[i].acceleration;
+				particle[i].position += particle[i].velocity;
 			}
-			if (particle[i].position.y >= 720 || particle[i].position.y < 0 || 
+			if (particle[i].position.y >= 720 || particle[i].position.y < 0 ||
 				particle[i].position.x >= 1280 || particle[i].position.x < 0) {
 				particle[i].isAlive = false;
 				particle[i].position = { 0,0 };
