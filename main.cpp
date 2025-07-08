@@ -1,7 +1,9 @@
 #include <Novice.h>
 #include <stdlib.h>
 #include <time.h>
-const char kWindowTitle[] = "GC1A_01_イイヅカ_ソラ_タイトル";
+#include <imgui.h>
+#include <cstdint>
+const char kWindowTitle[] = "Particle";
 
 //2次元のベクトル
 typedef struct Vector2 {
@@ -17,8 +19,8 @@ typedef struct Size {
 
 //2次元の整数ベクトル
 typedef struct Vector2Int {
-	int x;
-	int y;
+	int32_t x;
+	int32_t y;
 }Vector2Int;
 
 //パーティクルのデータ
@@ -26,28 +28,35 @@ typedef struct ParticleData {
 	Vector2 position;
 	Vector2 velocity;
 	Vector2 acceleration;
-	int radius;
+	int32_t radius;
 	Vector2Int random;
 	bool isAlive;
 }ParticleData;
 
-const int PARTICLE_NUM = 300;
+//パーティクルの数
+const int kParticleNum = 300;
+//ウィンドウのサイズ
+const float kWindowWidth = 600.0f;
+const float kWindowHeight = 400.0f;
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	// ライブラリの初期化
-	Novice::Initialize(kWindowTitle, 600, 400);
+	Novice::Initialize(kWindowTitle, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight));
 
 	// キー入力結果を受け取る箱
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
+	//パーティクル全体にかかる加速度
+	Vector2 particleAcceleration = { -0.3f, 0.3f };
+
 	//パーティクルの変数↓
-	ParticleData particle[PARTICLE_NUM] = { 0 };
-	for (int i = 0; i < PARTICLE_NUM; i++) {
+	ParticleData particle[kParticleNum] = { 0 };
+	for (int32_t i = 0; i < kParticleNum; i++) {
 		particle[i].position = { 0,0 };
 		particle[i].velocity = { 0,0 };
-		particle[i].acceleration = { -0.3f,0.3f };
+		particle[i].acceleration = particleAcceleration;
 		particle[i].radius = 0;
 		particle[i].random = { 0,0 };
 		particle[i].isAlive = false;
@@ -61,7 +70,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		50,50
 	};
 	//ランド関数に使う
-	srand((unsigned int)time(nullptr));
+	srand((uint32_t)time(nullptr));
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -76,39 +85,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-		//ボックスの横幅変更
-		if (keys[DIK_A] && emitSize.width > 10) {
-			emitSize.width--;
-		} else if (keys[DIK_D]) {
-			emitSize.width++;
-		}
 
-		//ボックスの縦幅変更
-		if (keys[DIK_S] && emitSize.height > 10) {
-			emitSize.height--;
-		} else if (keys[DIK_W]) {
-			emitSize.height++;
-		}
+		ImGui::Begin("Debug Particle");
+		ImGui::DragFloat2("EmitterSize", &emitSize.width, 0.1f, 1.0f, 1000.0f, "%.1f");
+		ImGui::DragFloat2("ParticleAcceleration", &particleAcceleration.x, 0.1f, -10.0f, 10.0f, "%.1f");
+		ImGui::End();
 
 		//パーティクルの召喚
-		for (int i = 0; i < PARTICLE_NUM; i++) {
+		for (int32_t i = 0; i < kParticleNum; i++) {
+			//パーティクルが生きていないならば
 			if (!particle[i].isAlive) {
+				//パーティクルを召喚する
 				particle[i].isAlive = true;
-				particle[i].random.x = rand() % (int)emitSize.width + mouseX - (int)emitSize.width / 2;
-				particle[i].random.y = rand() % (int)emitSize.height + mouseY - (int)emitSize.height / 2;
+				//加速度を設定
+				particle[i].acceleration = particleAcceleration;
+				//ランダムで位置を決める
+				particle[i].random.x = rand() % static_cast<int32_t>(emitSize.width) + mousePos.x - static_cast<int32_t>(emitSize.width / 2.0f);
+				particle[i].random.y = rand() % static_cast<int32_t>(emitSize.height) + mousePos.y - static_cast<int32_t>(emitSize.height / 2.0f);
+				//大きさもランダムで決める
 				particle[i].radius = rand() % 8 + 3;
-				particle[i].position = { (float)particle[i].random.x,(float)particle[i].random.y };
+				//位置を設定
+				particle[i].position = {
+					static_cast<float>(particle[i].random.x),
+					static_cast<float>(particle[i].random.y)
+				};
 				break;
 			}
 		}
 
 		//パーティクルの動き
-		for (int i = 0; i < PARTICLE_NUM; i++) {
+		for (int32_t i = 0; i < kParticleNum; i++) {
 			if (particle[i].isAlive) {
 				particle[i].velocity.y += particle[i].acceleration.y;
 				particle[i].position.y += particle[i].velocity.y;
 			}
-			if (particle[i].position.y >= 720) {
+			if (particle[i].position.y >= 720 || particle[i].position.y < 0 || 
+				particle[i].position.x >= 1280 || particle[i].position.x < 0) {
 				particle[i].isAlive = false;
 				particle[i].position = { 0,0 };
 				particle[i].velocity = { 0,0 };
@@ -123,27 +135,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		//背景
-		Novice::DrawBox(0, 0, 600, 400, 0.0f, BLACK, kFillModeSolid);
+		Novice::DrawBox(0, 0, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight), 0.0f, BLACK, kFillModeSolid);
 
 		//横のライン
-		Novice::DrawLine(0, 200, 600, 200, WHITE);
+		Novice::DrawLine(0, static_cast<int32_t>(kWindowHeight / 2.0f), static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight / 2.0f), WHITE);
 
 		//縦のライン
-		Novice::DrawLine(300, 0, 300, 400, WHITE);
+		Novice::DrawLine(static_cast<int32_t>(kWindowWidth / 2.0f), 0, static_cast<int32_t>(kWindowWidth / 2.0f), static_cast<int32_t>(kWindowHeight), WHITE);
 
 		//パーティクル
-		for (int i = 0; i < PARTICLE_NUM; i++) {
+		for (int32_t i = 0; i < kParticleNum; i++) {
 			if (particle[i].isAlive) {
-				Novice::DrawEllipse((int)particle[i].position.x, (int)particle[i].position.y, (int)particle[i].radius, particle[i].radius, 0.0f, WHITE, kFillModeSolid);
+				Novice::DrawEllipse(
+					static_cast<int32_t>(particle[i].position.x),
+					static_cast<int32_t>(particle[i].position.y),
+					particle[i].radius, particle[i].radius, 0.0f, WHITE, kFillModeSolid);
 			}
 		}
 
 		//ボックス
 		Novice::DrawBox(
-			mouseX - (int)emitSize.width / 2,
-			mouseY - (int)emitSize.height / 2,
-			(int)emitSize.width,
-			(int)emitSize.height,
+			mousePos.x - static_cast<int32_t>(emitSize.width / 2.0f),
+			mousePos.y - static_cast<int32_t>(emitSize.height / 2.0f),
+			static_cast<int32_t>(emitSize.width),
+			static_cast<int32_t>(emitSize.height),
 			0.0f, WHITE, kFillModeWireFrame);
 
 		///
