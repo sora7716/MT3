@@ -56,7 +56,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//パーティクル全体にかかる加速度
-	Vector2 particleAcceleration = { -0.3f, 0.3f };
+	Vector2 particleAcceleration = { 0.0f, 0.3f };
 
 	//パーティクルの変数↓
 	ParticleData particle[kParticleNum] = { 0 };
