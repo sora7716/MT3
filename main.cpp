@@ -41,7 +41,7 @@ typedef struct ParticleData {
 }ParticleData;
 
 //パーティクルの数
-const int kParticleNum = 300;
+const int32_t kParticleNum = 300;
 //ウィンドウのサイズ
 const float kWindowWidth = 600.0f;
 const float kWindowHeight = 400.0f;
