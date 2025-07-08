@@ -23,6 +23,9 @@
     <Filter Include="gameObject">
       <UniqueIdentifier>{608d9316-4e50-4bc3-bd06-169b0da937c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="math\myGameObject">
+      <UniqueIdentifier>{5568db77-35aa-4982-8aa8-6b52f1f0408b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -68,14 +71,17 @@
     <ClCompile Include="myMath\func\Collision.cpp">
       <Filter>math\func</Filter>
     </ClCompile>
-    <ClCompile Include="gameObject\Plane.cpp">
-      <Filter>KamataEngine</Filter>
+    <ClCompile Include="myMath\func\Easing.cpp">
+      <Filter>math\func</Filter>
     </ClCompile>
-    <ClCompile Include="gameObject\Line.cpp">
-      <Filter>KamataEngine</Filter>
+    <ClCompile Include="gameObject\Plane.cpp">
+      <Filter>math\myGameObject</Filter>
     </ClCompile>
     <ClCompile Include="gameObject\AABB.cpp">
-      <Filter>KamataEngine</Filter>
+      <Filter>math\myGameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="gameObject\Line.cpp">
+      <Filter>math\myGameObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,11 +211,20 @@
     <ClInclude Include="myMath\func\Collision.h">
       <Filter>math\func</Filter>
     </ClInclude>
-    <ClInclude Include="gameObject\Plane.h" />
     <ClInclude Include="myMath\ShapeData.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="gameObject\Line.h" />
-    <ClInclude Include="gameObject\AABB.h" />
+    <ClInclude Include="gameObject\Plane.h">
+      <Filter>math\myGameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="gameObject\Line.h">
+      <Filter>math\myGameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="gameObject\AABB.h">
+      <Filter>math\myGameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="myMath\func\Easing.h">
+      <Filter>math\func</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

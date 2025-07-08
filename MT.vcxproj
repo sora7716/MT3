@@ -16,6 +16,7 @@
     <ProjectGuid>{dc86b75a-729c-4bfe-9d58-202f3ea09031}</ProjectGuid>
     <RootNamespace>MT</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>AL2_Easing</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -120,6 +121,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClCompile Include="main.cpp" />
     <ClCompile Include="myMath\func\Aithmetic.cpp" />
     <ClCompile Include="myMath\func\Collision.cpp" />
+    <ClCompile Include="myMath\func\Easing.cpp" />
     <ClCompile Include="myMath\func\Math.cpp" />
     <ClCompile Include="myMath\func\Rendering.cpp" />
     <ClCompile Include="myMath\Matrix4x4.cpp" />
@@ -165,6 +167,7 @@ xcopy C:\KamataEngine\DirectXGame\Resources "$(OutDirFullPath)NoviceResources" /
     <ClInclude Include="gameObject\Sphere.h" />
     <ClInclude Include="myMath\func\Aithmetic.h" />
     <ClInclude Include="myMath\func\Collision.h" />
+    <ClInclude Include="myMath\func\Easing.h" />
     <ClInclude Include="myMath\func\Math.h" />
     <ClInclude Include="myMath\func\Rendering.h" />
     <ClInclude Include="myMath\Matrix3x3.h" />
