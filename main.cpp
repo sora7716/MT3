@@ -69,7 +69,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//スプライトのロード
-	int particle = Novice::LoadTexture("./particle.png");
+	int particle = Novice::LoadTexture("./Resources/particle.png");
 
 	//マウスの座標
 	Vector2Int mousePos = { 0, 0 };
