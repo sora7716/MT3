@@ -6,6 +6,9 @@ const char kWindowTitle[] = "Blend";
 //画面のサイズ
 const float kWindowWidth = 1280.0f;//ウィンドウの幅
 const float kWindowHeight = 720.0f;//ウィンドウの高さ
+//スプライトのサイズ
+const float kSpriteSize = 600.0f;//スプライトの幅
+
 //2次元のベクトル
 typedef struct Vector2 {
 	float x;
@@ -120,20 +123,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//ブレンドしたくない↓
 		Novice::SetBlendMode(BlendMode::kBlendModeNone);
 		//背景
-		Novice::DrawBox(0, 0, 1280, 720, 0.0f, BLACK, kFillModeSolid);
+		Novice::DrawBox(0, 0, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight), 0.0f, BLACK, kFillModeSolid);
 		//縦のライン
-		Novice::DrawLine(1280 / 2, 0, 1280 / 2, 720, WHITE);
+		Novice::DrawLine(static_cast<int32_t>(kWindowWidth/2.0f), 0, static_cast<int32_t>(kWindowWidth / 2.0f), static_cast<int32_t>(kWindowHeight), WHITE);
 		//横のライン
-		Novice::DrawLine(0, 720 / 2, 1280, 720 / 2, WHITE);
+		Novice::DrawLine(0, static_cast<int32_t>(kWindowHeight/2.0f), static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight/2.0f), WHITE);
 		//ブレンドしたくない↑
 
 		//ブレンドしたい↓
 		Novice::SetBlendMode(blend);
 		//マウス
-		Novice::DrawSprite(mousePos.x - 300, mousePos.y - 300, particle, 1, 1, 0.0f, color);
+		Novice::DrawSprite(mousePos.x - static_cast<int32_t>(kSpriteSize/2.0f), mousePos.y - static_cast<int32_t>(kSpriteSize / 2.0f), particle, 1, 1, 0.0f, color);
 		//真ん中のスプライト
-		for (int i = 0; i < 3; i++)
-		{
+		for (int i = 0; i < 3; i++){
 			Novice::DrawSprite((int)particlePos[i].x, (int)particlePos[i].y, particle, 1, 1, 0.0f, color);
 		}
 		//ブレンドしたい↑
