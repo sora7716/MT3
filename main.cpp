@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <imgui.h>
 
-const char kWindowTitle[] = "Particle";
+const char kWindowTitle[] = "AL2_1-6";
 
 //ベクトル
 typedef struct Vector2 {
@@ -57,7 +57,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//テクスチャ
-	int32_t particleImageHandle = Novice::LoadTexture("./Resources/particle.jpg");
+	int32_t particleImageHandle = Novice::LoadTexture("./Resources/xparticle.jpg");
 
 	//ランド関数に使う
 	srand((unsigned int)time(nullptr));
