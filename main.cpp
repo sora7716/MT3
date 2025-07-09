@@ -3,7 +3,7 @@
 #include <time.h>
 #include <imgui.h>
 #include <cstdint>
-const char kWindowTitle[] = "Particle";
+const char kWindowTitle[] = "AL2_1-5";
 
 //2次元のベクトル
 typedef struct Vector2 {
