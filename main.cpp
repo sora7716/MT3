@@ -57,7 +57,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//テクスチャ
-	int32_t particleImageHandle = Novice::LoadTexture("./Resources/xparticle.jpg");
+	int32_t particleImageHandle = Novice::LoadTexture("./Resources/particle.jpg");
 
 	//ランド関数に使う
 	srand((unsigned int)time(nullptr));
