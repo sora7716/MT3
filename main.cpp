@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <imgui.h>
 
-const char kWindowTitle[] = "Blend";
+const char kWindowTitle[] = "AL2_1-4";
 //画面のサイズ
 const float kWindowWidth = 1280.0f;//ウィンドウの幅
 const float kWindowHeight = 720.0f;//ウィンドウの高さ
