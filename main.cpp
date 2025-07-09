@@ -23,7 +23,7 @@ typedef struct LerpData {
 	Vector2 endPos;        // 終了位置
 } LerpData;
 
-const char kWindowTitle[] = "02_02_演出王:イージング";
+const char kWindowTitle[] = "AL2_1-3";
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
