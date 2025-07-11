@@ -23,6 +23,9 @@
     <Filter Include="gameObject">
       <UniqueIdentifier>{608d9316-4e50-4bc3-bd06-169b0da937c8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="myGameObject">
+      <UniqueIdentifier>{d14ee6db-5a7c-443b-9772-3b0dcac72d23}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -205,11 +208,17 @@
     <ClInclude Include="myMath\func\Collision.h">
       <Filter>math\func</Filter>
     </ClInclude>
-    <ClInclude Include="gameObject\Plane.h" />
     <ClInclude Include="myMath\ShapeData.h">
       <Filter>math</Filter>
     </ClInclude>
-    <ClInclude Include="gameObject\Line.h" />
-    <ClInclude Include="gameObject\AABB.h" />
+    <ClInclude Include="gameObject\Plane.h">
+      <Filter>myGameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="gameObject\Line.h">
+      <Filter>myGameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="gameObject\AABB.h">
+      <Filter>myGameObject</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
