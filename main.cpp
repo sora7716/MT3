@@ -223,7 +223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		triangleData.gameObject.size.x / 2.0f,triangleData.gameObject.size.y / 2.0f
 	};
 	//重心を求める
-	triangleData.rotateData.centroid = triangleData.rotateData.localVertices[static_cast<int>(kLeft)] + triangleData.rotateData.localVertices[static_cast<int>(kTop)] + triangleData.rotateData.localVertices[static_cast<int>(kRight)] / 3.0f;
+	triangleData.rotateData.centroid = (triangleData.rotateData.localVertices[static_cast<int>(kLeft)] + triangleData.rotateData.localVertices[static_cast<int>(kTop)] + triangleData.rotateData.localVertices[static_cast<int>(kRight)]) / 3.0f;
 	//重心を回転中心にする
 	for (int i = 0; i < kTriangleVertexNum; i++) {
 		triangleData.rotateData.localVertices[i] -= triangleData.rotateData.centroid;
@@ -234,7 +234,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	circle.gameObject.position = { 500.0f,500.0f };
 	circle.gameObject.size = { 50.0f,50.0f };//大きさ
 	circle.gameObject.color = GREEN;//色
-	circle.gameObject.velocity = { 1.0f,1.0f };//速度
+	circle.gameObject.velocity = { 5.0f,5.0f };//速度
 	circle.gameObject.isAlive = true;//生存フラグ
 	Vector2 circleToTriangle = {};
 	// ウィンドウの×ボタンが押されるまでループ
@@ -249,6 +249,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
+
+		triangleData.rotateData.theta += 0.1f;
 
 		//三角形の処理
 		if (triangleData.gameObject.isAlive) {
