@@ -7,7 +7,7 @@ const float kWindowHeight = 720.0f;//高さ
 //背景のテクスチャの数
 const int kBgImageNum = 4;
 //スピード
-const float kSpeed = 5.0f;
+const float kSpeed = 10.0f;
 //背景の余裕
 const float bgBuffer = 10;
 //マップ
@@ -173,7 +173,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		scroll.startPos.x = kMapMinPos + segment.origin.x;
 		scroll.endPos.x = kMapMaxPos - segment.origin.x;
 
-		if(player.gameObject.position.x)
 		if (player.worldPos.x > scroll.startPos.x) {
 			scroll.isScroll = true;
 		} else {
@@ -244,7 +243,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			segment.velocity.x = 0.0f;
 		}
 
-
+		//制限
+		if (segment.origin.x < 1.0f) {
+			segment.origin.x = 1.0f;
+		} else if (segment.origin.x >= kWindowWidth - 1.0f) {
+			segment.origin.x = kWindowWidth - 1.0f;
+		}
 
 		ImGui::Begin("bg");
 		ImGui::Checkbox("isScroll", &scroll.isScroll);
@@ -262,7 +266,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("player");
 		ImGui::DragFloat2("position", &player.gameObject.position.x, 0.1f);
 		ImGui::Text("worldPos:%f", player.worldPos.x);
-		ImGui::Text("seigen:%f", kWindowWidth * static_cast<float>(kBgImageNum - 1));
 		ImGui::End();
 
 		///
