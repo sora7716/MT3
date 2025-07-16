@@ -21,25 +21,31 @@ typedef struct Vector2 {
 	}
 }Vector2;
 
-//線分
-typedef struct Segment {
-	Vector2 origin;
-	Vector2 diff;
+//ゲームオブジェクト
+typedef struct GameObject {
+	Vector2 position;
+	Vector2 velocity;
+	Vector2 size;
+	unsigned int color;
+	bool isAlive;
+}GameObject;
 
-}Segment;
-
-bool IsCollision(Vector2 pointPos, Segment segment) {
-	Vector2 beginToEndForLine = (segment.origin + segment.diff) - segment.origin;
-	Vector2 lineBeginToPoint = segment.origin - pointPos;
-
-	float len = sqrtf(beginToEndForLine.x * beginToEndForLine.x + beginToEndForLine.y * beginToEndForLine.y) * sqrtf(lineBeginToPoint.x * lineBeginToPoint.x + lineBeginToPoint.y * lineBeginToPoint.y);
-
-	float dot = beginToEndForLine.x * lineBeginToPoint.x + beginToEndForLine.y * lineBeginToPoint.y;
-
-	if (dot != len) {
+bool IsCollision(GameObject obj1, GameObject obj2) {
+	//X座標の当たってない判定
+	if (obj1.position.x < obj2.position.x + obj2.size.x && obj1.position.x + obj1.size.x < obj2.position.x) {
+		return false;
+	} else if (obj2.position.x + obj2.size.x < obj1.position.x && obj2.position.x < obj1.position.x + obj1.size.x) {
 		return false;
 	}
-	return sqrtf(beginToEndForLine.x * beginToEndForLine.x + beginToEndForLine.y * beginToEndForLine.y) > sqrtf(lineBeginToPoint.x * lineBeginToPoint.x + lineBeginToPoint.y * lineBeginToPoint.y);
+
+	// Y座標の当たってない判定
+	else if (obj1.position.y + obj1.size.y > obj2.position.y && obj1.position.y > obj2.size.y && obj1.position.y) {
+		return false;
+	} else if (obj2.position.y + obj2.size.y > obj1.position.y && obj2.position.y > obj1.position.y + obj1.size.y) {
+		return false;
+	}
+
+	return true;
 }
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -52,13 +58,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	Vector2 pointPos = {};
-	Vector2 pointVelocity = {};
-	unsigned int pointColor = WHITE;
+	GameObject box[2] = {};
 
-	Segment segment = {};
-	segment.origin = { 100.0f,100.0f };
-	segment.diff = { 1000.0f,100.0f };
+	box[0].position = { 100.0f,100.0f };
+	box[1].position = { 200.0f,200.0f };
+	box[0].size = { 100.0f,100.0f };
+	box[1].size = { 50.0f,50.0f };
+	box[0].color = WHITE;
+	box[1].color = WHITE;
+	box[0].isAlive = true;
+	box[1].isAlive = true;
+
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -73,29 +83,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
-		pointPos.x += pointVelocity.x;
-		pointPos.y += pointVelocity.y;
-
-		if (IsCollision(pointPos, segment)) {
-			pointColor = RED;
-		} else {
-			pointColor = WHITE;
-		}
+		box[0].position.x += box[0].velocity.x;
+		box[0].position.y += box[0].velocity.y;
 
 		if (keys[DIK_W]) {
-			pointVelocity.y = -5.0f;
+			box[0].velocity.y = -5.0f;
 		} else if (keys[DIK_S]) {
-			pointVelocity.y = 5.0f;
+			box[0].velocity.y = 5.0f;
 		} else {
-			pointVelocity.y = 0.0f;
+			box[0].velocity.y = 0.0f;
 		}
 
 		if (keys[DIK_A]) {
-			pointVelocity.x = -5.0f;
+			box[0].velocity.x = -5.0f;
 		} else if (keys[DIK_D]) {
-			pointVelocity.x = 5.0f;
+			box[0].velocity.x = 5.0f;
 		} else {
-			pointVelocity.x = 0.0f;
+			box[0].velocity.x = 0.0f;
 		}
 
 		///
@@ -106,22 +110,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		Novice::DrawLine(
-			static_cast<int>(segment.origin.x),
-			static_cast<int>(segment.origin.y),
-			static_cast<int>(segment.origin.x + segment.diff.x),
-			static_cast<int>(segment.origin.y + segment.diff.y),
-			WHITE
-		);
-
-		Novice::DrawEllipse(
-			static_cast<int>(pointPos.x),
-			static_cast<int>(pointPos.y),
-			10,
-			10,
-			0.0f, pointColor,
-			kFillModeSolid
-		);
+		for (int i = 0; i < 2; i++) {
+			Novice::DrawBox(
+				static_cast<int>(box[i].position.x),
+				static_cast<int>(box[i].position.y),
+				static_cast<int>(box[i].size.x),
+				static_cast<int>(box[i].size.y),
+				0.0f, box[i].color, kFillModeSolid
+			);
+		}
 
 		///
 		/// ↑描画処理ここまで
