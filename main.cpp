@@ -4,6 +4,15 @@ const char kWindowTitle[] = "AL1_スクロール";
 //画面サイズ
 const float kWindowWidth = 1280.0f;//幅
 const float kWindowHeight = 720.0f;//高さ
+//背景のテクスチャの数
+const int kBgImageNum = 4;
+//スピード
+const float kSpeed = 5.0f;
+//背景の余裕
+const float bgBuffer = 10;
+//マップ
+const float kMapMinPos = 0.0f;//最小値
+const float kMapMaxPos = kWindowWidth * static_cast<float>(kBgImageNum);//最大値
 
 //2次元のベクトル
 typedef struct Vector2 {
@@ -45,15 +54,19 @@ typedef struct GameObject {
 }GameObject;
 
 //背景データ
-typedef struct BgData {
-	GameObject gameObject;
-	int textureHandle;
+typedef struct BgListData {
+	GameObject gameObject[kBgImageNum];
+	int textureHandle[kBgImageNum];
+	int begin;
+	int end;
 }BgData;
 
 //プレイヤーデータ
 typedef struct PlayerData {
 	GameObject gameObject;
 	float size;
+	Vector2 worldPos;
+	Vector2 worldVelocity;
 }PlayerData;
 
 //線分
@@ -63,14 +76,15 @@ typedef struct Segment {
 	Vector2 velocity;
 }Segment;
 
-//背景のテクスチャの数
-const int kBgImageNum = 4;
+//スクロールデータ
+typedef struct ScrollData {
+	Vector2 startPos;
+	Vector2 endPos;
+	Vector2 position;
+	Vector2 velocity;
+	bool isScroll;
+}ScrollData;
 
-//スピード
-const float kSpeed = 5.0f;
-
-//背景の余裕
-const float bgBuffer = 10;
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
@@ -82,21 +96,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//背景のオブジェクト
-	BgData bgObjects[kBgImageNum] = {};
-	bgObjects[0].textureHandle = Novice::LoadTexture("./images/bg1.png");
-	bgObjects[1].textureHandle = Novice::LoadTexture("./images/bg2.png");
-	bgObjects[2].textureHandle = Novice::LoadTexture("./images/bg3.png");
-	bgObjects[3].textureHandle = Novice::LoadTexture("./images/bg4.png");
+	BgListData bgObjectList = {};
+	bgObjectList.textureHandle[0] = Novice::LoadTexture("./images/bg1.png");
+	bgObjectList.textureHandle[1] = Novice::LoadTexture("./images/bg2.png");
+	bgObjectList.textureHandle[2] = Novice::LoadTexture("./images/bg3.png");
+	bgObjectList.textureHandle[3] = Novice::LoadTexture("./images/bg4.png");
 	//初期化
 	for (int i = 0; i < kBgImageNum; i++) {
-		bgObjects[i].gameObject.position.x = kWindowWidth * i;
-		bgObjects[i].gameObject.color = WHITE;
-		bgObjects[i].gameObject.isAlive = true;
+		bgObjectList.gameObject[i].position.x = kWindowWidth * i;
+		bgObjectList.gameObject[i].color = WHITE;
+		bgObjectList.gameObject[i].isAlive = true;
 	}
 	//背景の最後の位置
-	int bgEndFrame = kBgImageNum - 1;
-	//スクロール開始フラグ
-	bool isScrolling = false;
+	bgObjectList.begin = 0;
+	bgObjectList.end = kBgImageNum - 1;
 
 	//プレイヤー
 	PlayerData player = {};
@@ -109,6 +122,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Segment segment = {};
 	segment.origin.x = kWindowWidth / 2.0f;
 	segment.diff = { 0.0f,kWindowHeight };
+
+	//スクロール
+	ScrollData scroll = {};
+	scroll.isScroll = false;
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -121,38 +139,86 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
+		//ワールド座標
+		//移動
+		player.worldPos.x += player.worldVelocity.x;
+		player.worldPos.y -= player.worldVelocity.y;
+
+		//操作
+		if (keys[DIK_D]) {
+			player.worldVelocity.x = kSpeed;
+		} else if (keys[DIK_A]) {
+			player.worldVelocity.x = -kSpeed;
+		} else {
+			player.worldVelocity.x = 0.0f;
+		}
+
+		//スクロールの動き
+		//移動
+		scroll.position.x += scroll.velocity.x;
+		scroll.position.y -= scroll.velocity.y;
+
+		//操作
+		if (scroll.isScroll) {
+			if (keys[DIK_D]) {
+				scroll.velocity.x = kSpeed;
+			} else if (keys[DIK_A]) {
+				scroll.velocity.x = -kSpeed;
+			} else {
+				scroll.velocity.x = 0.0f;
+			}
+		}
+
+		//スクロールの制限
+		scroll.startPos.x = kMapMinPos + segment.origin.x;
+		scroll.endPos.x = kMapMaxPos - segment.origin.x;
+
+		if(player.gameObject.position.x)
+		if (player.worldPos.x > scroll.startPos.x) {
+			scroll.isScroll = true;
+		} else {
+			scroll.isScroll = false;
+		}
+
+		if (player.worldPos.x >= scroll.endPos.x) {
+			scroll.isScroll = false;
+		}
+
+		//画面の制限
+		/*if (player.worldPos.x <= 0.0f) {
+			bgObjectList.gameObject[bgBeginFrame].position.x = 0.0f;
+			scroll.isScroll = false;
+		} else if (player.worldPos.x > kWindowWidth * static_cast<float>(kBgImageNum - 1)) {
+			bgObjectList.gameObject[bgEndFrame].position.x = 0.0f;
+			scroll.isScroll = false;
+		}*/
 
 		//背景
 		for (int i = 0; i < kBgImageNum; i++) {
 			//移動
-			bgObjects[i].gameObject.position.x += bgObjects[i].gameObject.velocity.x;
-			bgObjects[i].gameObject.position.y += bgObjects[i].gameObject.velocity.y;
+			bgObjectList.gameObject[i].position.x += bgObjectList.gameObject[i].velocity.x;
+			bgObjectList.gameObject[i].position.y -= bgObjectList.gameObject[i].velocity.y;
 
-			//背景の操作
-			if (isScrolling) {
+			//操作
+			if (scroll.isScroll) {
 				if (keys[DIK_D]) {
-					bgObjects[i].gameObject.velocity.x = -kSpeed;
+					bgObjectList.gameObject[i].velocity.x = -kSpeed;
 				} else if (keys[DIK_A]) {
-					bgObjects[i].gameObject.velocity.x = kSpeed;
+					bgObjectList.gameObject[i].velocity.x = kSpeed;
 				} else {
-					bgObjects[i].gameObject.velocity.x = 0.0f;
+					bgObjectList.gameObject[i].velocity.x = 0.0f;
 				}
 			} else {
-				bgObjects[i].gameObject.velocity.x = 0.0f;
+				bgObjectList.gameObject[i].velocity.x = 0.0f;
 			}
 		}
 
-		//背景の最後の位置が左端に来たら
-		if (bgObjects[bgEndFrame].gameObject.position.x <= 0.0f + bgBuffer) {
-			isScrolling = false;
-		}
-
-		//プレイヤー
+		//プレイヤーの動き
 		//移動
 		player.gameObject.position.x += player.gameObject.velocity.x;
-		player.gameObject.position.y += player.gameObject.velocity.y;
-		//スクロールがfalseだった場合
-		if (!isScrolling) {
+		player.gameObject.position.y -= player.gameObject.velocity.y;
+		//操作
+		if (!scroll.isScroll) {
 			if (keys[DIK_D]) {
 				player.gameObject.velocity.x = kSpeed;
 			} else if (keys[DIK_A]) {
@@ -167,8 +233,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//境界線の動き
 		//移動
 		segment.origin.x += segment.velocity.x;
-		segment.origin.y += segment.velocity.y;
-		//境界線の操作
+		segment.origin.y -= segment.velocity.y;
+
+		//操作
 		if (keys[DIK_RIGHT]) {
 			segment.velocity.x = kSpeed;
 		} else if (keys[DIK_LEFT]) {
@@ -177,12 +244,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			segment.velocity.x = 0.0f;
 		}
 
+
+
 		ImGui::Begin("bg");
-		ImGui::Checkbox("isScrolling", &isScrolling);
+		ImGui::Checkbox("isScroll", &scroll.isScroll);
+		ImGui::DragFloat2("segmentOrigin", &segment.origin.x, 0.1f);
+		ImGui::Text("mapMin%f", kMapMinPos);
+		ImGui::Text("scrollStart%f", scroll.startPos.x);
+		ImGui::Text("mapMax%f", kMapMaxPos);
+		ImGui::Text("scrollEnd%f", scroll.endPos.x);
+		ImGui::DragFloat2("bg[0].pos", &bgObjectList.gameObject[0].position.x, 0.1f);
+		ImGui::DragFloat2("bg[1].pos", &bgObjectList.gameObject[1].position.x, 0.1f);
+		ImGui::DragFloat2("bg[2].pos", &bgObjectList.gameObject[2].position.x, 0.1f);
+		ImGui::DragFloat2("bg[3].pos", &bgObjectList.gameObject[3].position.x, 0.1f);
 		ImGui::End();
 
 		ImGui::Begin("player");
 		ImGui::DragFloat2("position", &player.gameObject.position.x, 0.1f);
+		ImGui::Text("worldPos:%f", player.worldPos.x);
+		ImGui::Text("seigen:%f", kWindowWidth * static_cast<float>(kBgImageNum - 1));
 		ImGui::End();
 
 		///
@@ -194,13 +274,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		//背景の描画
-		for (const auto& bgObject : bgObjects) {
-			if (bgObject.gameObject.isAlive) {
+		for (int i = 0; i < kBgImageNum; i++) {
+			if (bgObjectList.gameObject[i].isAlive) {
 				Novice::DrawSprite(
-					static_cast<int>(bgObject.gameObject.position.x),
-					static_cast<int>(bgObject.gameObject.position.y),
-					bgObject.textureHandle,
-					1.0f, 1.0f, 0.0f, bgObject.gameObject.color
+					static_cast<int>(bgObjectList.gameObject[i].position.x),
+					static_cast<int>(bgObjectList.gameObject[i].position.y),
+					bgObjectList.textureHandle[i],
+					1.0f, 1.0f, 0.0f, bgObjectList.gameObject[i].color
 				);
 			}
 		}
