@@ -139,6 +139,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
+		
 		//ワールド座標
 		//移動
 		player.worldPos.x += player.worldVelocity.x;
@@ -167,30 +168,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			} else {
 				scroll.velocity.x = 0.0f;
 			}
+		} else {
+			scroll.velocity.x = 0.0f;
 		}
 
-		//スクロールの制限
+		//スクロール開始位置と最終位置を設定
 		scroll.startPos.x = kMapMinPos + segment.origin.x;
 		scroll.endPos.x = kMapMaxPos - segment.origin.x;
 
-		if (player.worldPos.x > scroll.startPos.x) {
+		//プレイヤーの最大値と最小値(x座標)
+		float playerWorldMaxX = { player.worldPos.x + player.size };
+		float playerWorldMinX = { player.worldPos.x - player.size };
+
+		//スクロールの制限
+		//スクロールの開始位置と最終位置の範囲に入ったら
+		if (scroll.startPos.x < playerWorldMaxX && scroll.endPos.x > playerWorldMinX) {
 			scroll.isScroll = true;
 		} else {
 			scroll.isScroll = false;
 		}
-
-		if (player.worldPos.x >= scroll.endPos.x) {
-			scroll.isScroll = false;
-		}
-
-		//画面の制限
-		/*if (player.worldPos.x <= 0.0f) {
-			bgObjectList.gameObject[bgBeginFrame].position.x = 0.0f;
-			scroll.isScroll = false;
-		} else if (player.worldPos.x > kWindowWidth * static_cast<float>(kBgImageNum - 1)) {
-			bgObjectList.gameObject[bgEndFrame].position.x = 0.0f;
-			scroll.isScroll = false;
-		}*/
 
 		//背景
 		for (int i = 0; i < kBgImageNum; i++) {
@@ -253,14 +249,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		ImGui::Begin("bg");
 		ImGui::Checkbox("isScroll", &scroll.isScroll);
 		ImGui::DragFloat2("segmentOrigin", &segment.origin.x, 0.1f);
-		ImGui::Text("mapMin%f", kMapMinPos);
 		ImGui::Text("scrollStart%f", scroll.startPos.x);
-		ImGui::Text("mapMax%f", kMapMaxPos);
 		ImGui::Text("scrollEnd%f", scroll.endPos.x);
-		ImGui::DragFloat2("bg[0].pos", &bgObjectList.gameObject[0].position.x, 0.1f);
-		ImGui::DragFloat2("bg[1].pos", &bgObjectList.gameObject[1].position.x, 0.1f);
-		ImGui::DragFloat2("bg[2].pos", &bgObjectList.gameObject[2].position.x, 0.1f);
-		ImGui::DragFloat2("bg[3].pos", &bgObjectList.gameObject[3].position.x, 0.1f);
 		ImGui::End();
 
 		ImGui::Begin("player");
