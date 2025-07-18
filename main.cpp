@@ -4,44 +4,22 @@ const char kWindowTitle[] = "AL1_スクロール";
 //画面サイズ
 const float kWindowWidth = 1280.0f;//幅
 const float kWindowHeight = 720.0f;//高さ
-//背景のテクスチャの数
-const int kBgImageNum = 4;
-//スピード
-const float kSpeed = 10.0f;
-//背景の余裕
-const float bgBuffer = 10;
-//マップ
-const float kMapMinPos = 0.0f;//最小値
-const float kMapMaxPos = kWindowWidth * static_cast<float>(kBgImageNum);//最大値
 
-//2次元のベクトル
+//背景の画像数
+const int kBgTexNum = 4;
+//スピードの定数
+const float kSpeed = 10.0f;
+
+//二次元のベクトル
 typedef struct Vector2 {
 	float x;
 	float y;
 
 	//加算
-	Vector2 operator+(Vector2& v) {
-		Vector2 result = {};
-		result.x = x + v.x;
-		result.y = y + v.y;
-		return result;
-	}
-
-	//減算
-	Vector2 operator-(Vector2& v) {
-		Vector2 result = {};
-		result.x = x - v.x;
-		result.y = y - v.y;
-		return result;
-	}
-
-	/// <summary>
-	/// クロス積
-	/// </summary>
-	/// <param name="v">ベクトル</param>
-	/// <returns>クロス積</returns>
-	float Cross(const Vector2& v) {
-		return x * v.y - y * v.x;
+	Vector2& operator+=(Vector2 v) {
+		this->x += v.x;
+		this->y += v.y;
+		return *this;
 	}
 }Vector2;
 
@@ -49,40 +27,23 @@ typedef struct Vector2 {
 typedef struct GameObject {
 	Vector2 position;
 	Vector2 velocity;
+	Vector2 size;
 	unsigned int color;
-	bool isAlive;
 }GameObject;
 
-//背景データ
+//背景リストのデータ
 typedef struct BgListData {
-	GameObject gameObject[kBgImageNum];
-	int textureHandle[kBgImageNum];
-	int begin;
-	int end;
-}BgData;
+	GameObject gameObject[kBgTexNum];
+	int textureHandle[kBgTexNum];
+}BgListData;
 
-//プレイヤーデータ
-typedef struct PlayerData {
-	GameObject gameObject;
-	float size;
-	Vector2 worldPos;
-	Vector2 worldVelocity;
-}PlayerData;
-
-//線分
-typedef struct Segment {
-	Vector2 origin;
-	Vector2 diff;
-	Vector2 velocity;
-}Segment;
-
-//スクロールデータ
+//スクロール
 typedef struct ScrollData {
-	Vector2 startPos;
-	Vector2 endPos;
 	Vector2 position;
 	Vector2 velocity;
-	bool isScroll;
+	Vector2 startPos;
+	Vector2 endPos;
+	bool isStart;
 }ScrollData;
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -95,37 +56,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char keys[256] = { 0 };
 	char preKeys[256] = { 0 };
 
-	//背景のオブジェクト
-	BgListData bgObjectList = {};
-	bgObjectList.textureHandle[0] = Novice::LoadTexture("./images/bg1.png");
-	bgObjectList.textureHandle[1] = Novice::LoadTexture("./images/bg2.png");
-	bgObjectList.textureHandle[2] = Novice::LoadTexture("./images/bg3.png");
-	bgObjectList.textureHandle[3] = Novice::LoadTexture("./images/bg4.png");
-	//初期化
-	for (int i = 0; i < kBgImageNum; i++) {
-		bgObjectList.gameObject[i].position.x = kWindowWidth * i;
-		bgObjectList.gameObject[i].color = WHITE;
-		bgObjectList.gameObject[i].isAlive = true;
+	//背景
+	BgListData bgList = {};
+	//画像の読み込み
+	bgList.textureHandle[0] = Novice::LoadTexture("./images/bg1.png");
+	bgList.textureHandle[1] = Novice::LoadTexture("./images/bg2.png");
+	bgList.textureHandle[2] = Novice::LoadTexture("./images/bg3.png");
+	bgList.textureHandle[3] = Novice::LoadTexture("./images/bg4.png");
+
+	//ゲームオブジェクトの初期化
+	for (int i = 0; i < kBgTexNum; i++) {
+		bgList.gameObject[i].position.x = kWindowWidth * i;
+		bgList.gameObject[i].color = WHITE;
 	}
-	//背景の最後の位置
-	bgObjectList.begin = 0;
-	bgObjectList.end = kBgImageNum - 1;
-
-	//プレイヤー
-	PlayerData player = {};
-	player.gameObject.position = { 0.0f,563.0f };
-	player.gameObject.color = RED;
-	player.gameObject.isAlive = true;
-	player.size = 30.0f;
-
-	//線
-	Segment segment = {};
-	segment.origin.x = kWindowWidth / 2.0f;
-	segment.diff = { 0.0f,kWindowHeight };
 
 	//スクロール
 	ScrollData scroll = {};
-	scroll.isScroll = false;
+	scroll.startPos.x = kWindowWidth / 2.0f;
+	scroll.endPos.x = kWindowWidth * static_cast<float>(kBgTexNum - 1);
+	scroll.isStart = false;
+
+	//プレイヤー
+	GameObject player = {};
+	player.position.y = -63.0f;
+	player.size = { 30.0f,30.0f };
+	player.color = BLUE;
+
+	//境界線の速度
+	Vector2 lineVelocity = {};
 
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
@@ -139,124 +97,111 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		/// ↓更新処理ここから
 		///
-		
-		//ワールド座標
-		//移動
-		player.worldPos.x += player.worldVelocity.x;
-		player.worldPos.y -= player.worldVelocity.y;
 
-		//操作
-		if (keys[DIK_D]) {
-			player.worldVelocity.x = kSpeed;
-		} else if (keys[DIK_A]) {
-			player.worldVelocity.x = -kSpeed;
-		} else {
-			player.worldVelocity.x = 0.0f;
-		}
-
-		//スクロールの動き
-		//移動
-		scroll.position.x += scroll.velocity.x;
-		scroll.position.y -= scroll.velocity.y;
-
-		//操作
-		if (scroll.isScroll) {
-			if (keys[DIK_D]) {
+		//スクロール
+		if (scroll.isStart) {
+			//キー入力で操作
+			if (keys[DIK_A]) {
 				scroll.velocity.x = kSpeed;
-			} else if (keys[DIK_A]) {
+			} else if (keys[DIK_D]) {
 				scroll.velocity.x = -kSpeed;
 			} else {
 				scroll.velocity.x = 0.0f;
 			}
-		} else {
-			scroll.velocity.x = 0.0f;
-		}
 
-		//スクロール開始位置と最終位置を設定
-		scroll.startPos.x = kMapMinPos + segment.origin.x;
-		scroll.endPos.x = kMapMaxPos - segment.origin.x;
+			//スクロールの移動
+			scroll.position += scroll.velocity;
 
-		//プレイヤーの最大値と最小値(x座標)
-		float playerWorldMaxX = { player.worldPos.x + player.size };
-		float playerWorldMinX = { player.worldPos.x - player.size };
+			for (int i = 0; i < kBgTexNum; i++) {
+				//背景の移動
+				bgList.gameObject[i].position += scroll.velocity;
+			}
 
-		//スクロールの制限
-		//スクロールの開始位置と最終位置の範囲に入ったら
-		if (scroll.startPos.x < playerWorldMaxX && scroll.endPos.x > playerWorldMinX) {
-			scroll.isScroll = true;
-		} else {
-			scroll.isScroll = false;
-		}
-
-		//背景
-		for (int i = 0; i < kBgImageNum; i++) {
-			//移動
-			bgObjectList.gameObject[i].position.x += bgObjectList.gameObject[i].velocity.x;
-			bgObjectList.gameObject[i].position.y -= bgObjectList.gameObject[i].velocity.y;
-
-			//操作
-			if (scroll.isScroll) {
-				if (keys[DIK_D]) {
-					bgObjectList.gameObject[i].velocity.x = -kSpeed;
-				} else if (keys[DIK_A]) {
-					bgObjectList.gameObject[i].velocity.x = kSpeed;
-				} else {
-					bgObjectList.gameObject[i].velocity.x = 0.0f;
+			//スクロールの制限
+			if (scroll.position.x < -kWindowWidth * static_cast<float>(kBgTexNum - 1)) {
+				scroll.position.x = -kWindowWidth * static_cast<float>(kBgTexNum - 1);
+				scroll.isStart = false;
+				for (int i = 0; i < kBgTexNum; i++) {
+					bgList.gameObject[(kBgTexNum - 1) - i].position.x = -kWindowWidth * static_cast<float>(i);
 				}
-			} else {
-				bgObjectList.gameObject[i].velocity.x = 0.0f;
+			} else if (scroll.position.x > 0.0f) {
+				scroll.position.x = 0.0f;
+				scroll.isStart = false;
+				for (int i = 0; i < kBgTexNum; i++) {
+					bgList.gameObject[i].position.x = kWindowWidth * static_cast<float>(i);
+				}
+			}
+
+			//線から外れたら
+			if (player.position.x + player.size.x < scroll.startPos.x) {
+				scroll.isStart = false;
 			}
 		}
 
-		//プレイヤーの動き
-		//移動
-		player.gameObject.position.x += player.gameObject.velocity.x;
-		player.gameObject.position.y -= player.gameObject.velocity.y;
-		//操作
-		if (!scroll.isScroll) {
-			if (keys[DIK_D]) {
-				player.gameObject.velocity.x = kSpeed;
-			} else if (keys[DIK_A]) {
-				player.gameObject.velocity.x = -kSpeed;
+		//プレイヤー
+		if (!scroll.isStart) {
+			//キー入力で操作
+			if (keys[DIK_A]) {
+				player.velocity.x = -kSpeed;
+			} else if (keys[DIK_D]) {
+				player.velocity.x = kSpeed;
 			} else {
-				player.gameObject.velocity.x = 0.0f;
+				player.velocity.x = 0.0f;
 			}
-		} else {
-			player.gameObject.velocity.x = 0.0f;
+
+			//プレイヤーの移動
+			player.position += player.velocity;
+
+			//プレイヤーの制限
+			if (player.position.x < 0.0f) {
+				player.position.x = 0.0f;
+			} else if (player.position.x > kWindowWidth - player.size.x) {
+				player.position.x = kWindowWidth - player.size.x;
+			}
+
+			//スクロールを開始するか
+			if (bgList.gameObject[0].position.x >= 0.0f) {
+				if (player.position.x + player.size.x > scroll.startPos.x) {
+					scroll.isStart = true;
+					player.position.x = scroll.startPos.x - player.size.x;
+				}
+			} else if (bgList.gameObject[kBgTexNum - 1].position.x >= 0.0f) {
+				if (player.position.x + player.size.x < scroll.startPos.x) {
+					scroll.isStart = true;
+					player.position.x = scroll.startPos.x - player.size.x;
+				}
+			}
 		}
 
-		//境界線の動き
-		//移動
-		segment.origin.x += segment.velocity.x;
-		segment.origin.y -= segment.velocity.y;
+		//プレイヤーの座標を変換
+		float playerWorldPosY = (player.position.y - 500.0f) * -1.0f;
 
-		//操作
+		//境界線
+		//移動
+		scroll.startPos += lineVelocity;
+
+		//キー入力で操作
 		if (keys[DIK_RIGHT]) {
-			segment.velocity.x = kSpeed;
+			lineVelocity.x = kSpeed;
 		} else if (keys[DIK_LEFT]) {
-			segment.velocity.x = -kSpeed;
+			lineVelocity.x = -kSpeed;
 		} else {
-			segment.velocity.x = 0.0f;
+			lineVelocity.x = 0.0f;
 		}
 
-		//制限
-		if (segment.origin.x < 1.0f) {
-			segment.origin.x = 1.0f;
-		} else if (segment.origin.x >= kWindowWidth - 1.0f) {
-			segment.origin.x = kWindowWidth - 1.0f;
-		}
-
-		ImGui::Begin("bg");
-		ImGui::Checkbox("isScroll", &scroll.isScroll);
-		ImGui::DragFloat2("segmentOrigin", &segment.origin.x, 0.1f);
-		ImGui::Text("scrollStart%f", scroll.startPos.x);
-		ImGui::Text("scrollEnd%f", scroll.endPos.x);
+		ImGui::Begin("scroll");
+		ImGui::DragFloat2("position", &scroll.position.x, 0.1f);
+		ImGui::DragFloat2("velocity", &scroll.velocity.x, 0.1f);
+		ImGui::DragFloat2("bg[0].position", &bgList.gameObject[0].position.x, 0.1f);
+		ImGui::DragFloat2("bg[1].position", &bgList.gameObject[1].position.x, 0.1f);
+		ImGui::DragFloat2("bg[2].position", &bgList.gameObject[2].position.x, 0.1f);
+		ImGui::DragFloat2("bg[3].position", &bgList.gameObject[3].position.x, 0.1f);
 		ImGui::End();
 
 		ImGui::Begin("player");
-		ImGui::DragFloat2("position", &player.gameObject.position.x, 0.1f);
-		ImGui::Text("worldPos:%f", player.worldPos.x);
+		ImGui::DragFloat2("position", &player.position.x, 0.1f);
 		ImGui::End();
+
 
 		///
 		/// ↑更新処理ここまで
@@ -266,38 +211,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓描画処理ここから
 		///
 
-		//背景の描画
-		for (int i = 0; i < kBgImageNum; i++) {
-			if (bgObjectList.gameObject[i].isAlive) {
-				Novice::DrawSprite(
-					static_cast<int>(bgObjectList.gameObject[i].position.x),
-					static_cast<int>(bgObjectList.gameObject[i].position.y),
-					bgObjectList.textureHandle[i],
-					1.0f, 1.0f, 0.0f, bgObjectList.gameObject[i].color
-				);
-			}
-		}
-
-		//プレイヤー
-		if (player.gameObject.isAlive) {
-			Novice::DrawBox(
-				static_cast<int>(player.gameObject.position.x),
-				static_cast<int>(player.gameObject.position.y),
-				static_cast<int>(player.size),
-				static_cast<int>(player.size),
-				0.0f, player.gameObject.color, kFillModeSolid
+		//背景
+		for (int i = 0; i < kBgTexNum; i++) {
+			Novice::DrawSprite(
+				static_cast<int>(bgList.gameObject[i].position.x),
+				static_cast<int>(bgList.gameObject[i].position.y),
+				bgList.textureHandle[i],
+				1.0f, 1.0f, 0.0f, bgList.gameObject[i].color
 			);
 		}
 
-		//スクロールする境界線
-		Novice::DrawLine(
-			static_cast<int>(segment.origin.x),
-			static_cast<int>(segment.origin.y),
-			static_cast<int>(segment.origin.x + segment.diff.x),
-			static_cast<int>(segment.origin.y + segment.diff.y),
-			RED
+		//プレイヤー
+		Novice::DrawBox(
+			static_cast<int>(player.position.x),
+			static_cast<int>(playerWorldPosY),
+			static_cast<int>(player.size.x),
+			static_cast<int>(player.size.y),
+			0.0f, player.color, kFillModeSolid
 		);
 
+		Novice::DrawLine(
+			static_cast<int>(scroll.startPos.x),
+			0,
+			static_cast<int>(scroll.startPos.x),
+			static_cast<int>(kWindowHeight),
+			RED
+		);
 		///
 		/// ↑描画処理ここまで
 		///
