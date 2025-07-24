@@ -145,27 +145,25 @@ typedef struct PlayerData {
 /// <param name="target">ターゲット</param>
 /// <returns>衝突しているかの判定</returns>
 bool IsCollision(Vector2* triangleVertices, Vector2 target) {
-	// 各辺のベクトル
-	Vector2 A = triangleVertices[0];
-	Vector2 B = triangleVertices[1];
-	Vector2 C = triangleVertices[2];
 
-	Vector2 AB = B - A;
-	Vector2 BC = C - B;
-	Vector2 CA = A - C;
+	//三角形の各辺の差分ベクトル
+	Vector2 topToLeft = triangleVertices[static_cast<int>(kLeft)] - triangleVertices[static_cast<int>(kTop)];
+	Vector2 leftToRight = triangleVertices[static_cast<int>(kRight)] - triangleVertices[static_cast<int>(kLeft)];
+	Vector2 rightToTop = triangleVertices[static_cast<int>(kTop)] - triangleVertices[static_cast<int>(kRight)];
 
-	Vector2 AP = target - A;
-	Vector2 BP = target - B;
-	Vector2 CP = target - C;
+	//三角形の各頂点とターゲットの差分ベクトル
+	Vector2 topToTarget = target - triangleVertices[static_cast<int>(kTop)];
+	Vector2 leftToTarget = target - triangleVertices[static_cast<int>(kLeft)];
+	Vector2 rightToTarget = target - triangleVertices[static_cast<int>(kRight)];
 
-	float cross1 = AB.GetCross(AP);
-	float cross2 = BC.GetCross(BP);
-	float cross3 = CA.GetCross(CP);
+	//外積
+	float cross[3] = {
+		topToLeft.GetCross(topToTarget),
+		leftToRight.GetCross(leftToTarget),
+		rightToTop.GetCross(rightToTarget)
+	};
 
-	// すべて符号が同じなら三角形の中にある
-	return (cross1 >= 0.0f && cross2 >= 0.0f && cross3 >= 0.0f) ||
-		(cross1 <= 0.0f && cross2 <= 0.0f && cross3 <= 0.0f);
-
+	return cross[0] < 0.0f && cross[1] < 0.0f && cross[2] < 0.0f;
 }
 
 /// <summary>
@@ -178,22 +176,19 @@ float ConversionForRadian(float degree) {
 }
 
 /// <summary>
-/// 三角形と円の当たり判定
+/// クランプ
 /// </summary>
-/// <param name="triangleVertices">三角形の頂点</param>
-/// <param name="target">ターゲット</param>
-/// <returns>衝突したかどうか</returns>
-bool IsCollisionTriangle(Vector2* triangleVertices, GameObject target) {
-	for (int i = 0; i < 360; i++) {
-		Vector2 collisionPos = {
-			target.position.x + (target.size.x * cosf(ConversionForRadian(static_cast<float>(i)))),
-			target.position.y + (target.size.y * sinf(ConversionForRadian(static_cast<float>(i))))
-		};
-		if (IsCollision(triangleVertices, collisionPos)) {
-			return true;
-		}
+/// <param name="num">対象の値</param>
+/// <param name="min">最小値</param>
+/// <param name="max">最大値</param>
+/// <returns>クランプした値</returns>
+float Clamp(float num, float min, float max) {
+	if (num < min) {
+		return min;
+	} else if (num > max) {
+		return max;
 	}
-	return false;
+	return num;
 }
 
 // Windowsアプリでのエントリーポイント(main関数)
@@ -250,7 +245,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		/// ↓更新処理ここから
 		///
 
-		triangleData.rotateData.theta += 0.1f;
+		//triangleData.rotateData.theta += 0.1f;
 
 		//三角形の処理
 		if (triangleData.gameObject.isAlive) {
@@ -293,11 +288,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			circle.gameObject.position += circle.gameObject.velocity * circle.direction;
 		}
 
+		//衝突判定のターゲットポイント
+		Vector2 targetPoint = {
+			Clamp(circle.gameObject.position.x,-circle.gameObject.size.x,circle.gameObject.size.x),
+			Clamp(circle.gameObject.position.y,-circle.gameObject.size.y,circle.gameObject.size.y)
+		};
+
 		//衝突判定
-		if (IsCollisionTriangle(triangleData.rotateData.screenVertices, circle.gameObject)) {
-			circle.gameObject.color = BLUE;
+		if (IsCollision(triangleData.rotateData.screenVertices, targetPoint)) {
+			circle.gameObject.color = BLUE - 0x00000055;
 		} else {
-			circle.gameObject.color = GREEN;
+			circle.gameObject.color = GREEN - 0x00000055;
 		}
 
 		///
