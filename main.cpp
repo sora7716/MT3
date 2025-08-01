@@ -54,7 +54,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//ベクトル
-	Vector2 vector = { 300,200 };
+	Vector2 vector = { 300.0f,200.0f };
 
 	//回転
 	float theta = 0.0f;
