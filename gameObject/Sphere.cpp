@@ -6,6 +6,7 @@
 #define _USE_MATH_DEFINES
 #include <numbers>
 #include <string>
+#include <imgui.h>
 using namespace std;
 
 //初期化
@@ -63,6 +64,12 @@ void Sphere::Update() {
 			coordB_.screen.push_back(BaseGameObject::ScreenTransform(camera_, coordB_.local));
 			coordC_.screen.push_back(BaseGameObject::ScreenTransform(camera_, coordC_.local));
 		}
+	}
+
+	for (int i = 0; i < coordA_.screen.size(); i++) {
+		ImGui::DragFloat3("screenA", &coordA_.screen[i].x);
+		ImGui::DragFloat3("screenB", &coordB_.screen[i].x);
+		ImGui::DragFloat3("screenC", &coordC_.screen[i].x);
 	}
 }
 
