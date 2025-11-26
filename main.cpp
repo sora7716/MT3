@@ -83,10 +83,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ブレンドモード
 	BlendMode blend = BlendMode::kBlendModeNone;
 
-	//カラー(Vector4)
-	Vector4 color4 = { 1.0f, 1.0f, 1.0f, 1.0f };
-	//カラー
-	unsigned int color = WHITE;
+	//マウスカーソルについてくる矩形の色
+	Vector4 frontRectColor4 = { 1.0f, 1.0f, 1.0f, 1.0f };
+	uint32_t frontRectColor = WHITE;
+
+	//後ろにある矩形の色
+	Vector4 backRectColor4 = { 1.0f, 1.0f, 1.0f, 1.0f };
+	uint32_t backRectColor = WHITE;
+
+	//背景の色
+	Vector4 bgColor4 = {0.0f,0.0f,0.0f,1.0f};
+	uint32_t bgColor = BLACK;
+
 	// ウィンドウの×ボタンが押されるまでループ
 	while (Novice::ProcessMessage() == 0) {
 		// フレームの開始
@@ -102,14 +110,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 		
 		ImGui::Begin("Debug Blend");
-		const char* blendModes[] = { "None", "Normal", "Add", "Subtract" };
-		int blendIndex = static_cast<int>(blend);
+
+		const char* blendModes[] = { "None", "Normal", "Add", "Subtract","Multiply","Screen"};
+		int32_t blendIndex = static_cast<int32_t>(blend);
 		if (ImGui::Combo("BlendMode", &blendIndex, blendModes, IM_ARRAYSIZE(blendModes))) {
 			// blendIndexが変更されたらBlendModeに変換して反映
 			blend = static_cast<BlendMode>(blendIndex);
 		}
-		ImGui::ColorEdit4("color", &color4.x);
-		color = ColorCodeFromVector4(color4);
+
+		ImGui::ColorEdit4("bgColor", &bgColor4.x);
+		bgColor = ColorCodeFromVector4(bgColor4);
+
+		ImGui::ColorEdit4("frontRectColor", &frontRectColor4.x);
+		frontRectColor = ColorCodeFromVector4(frontRectColor4);
+
+		ImGui::ColorEdit4("backRectColor", &backRectColor4.x);
+		backRectColor = ColorCodeFromVector4(backRectColor4);
+
 		ImGui::End();
 		
 		///
@@ -121,9 +138,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		//ブレンドしたくない↓
-		Novice::SetBlendMode(BlendMode::kBlendModeNone);
+		Novice::SetBlendMode(BlendMode::kBlendModeNormal);
 		//背景
-		Novice::DrawBox(0, 0, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight), 0.0f, BLACK, kFillModeSolid);
+		Novice::DrawBox(0, 0, static_cast<int32_t>(kWindowWidth), static_cast<int32_t>(kWindowHeight), 0.0f, bgColor, kFillModeSolid);
 		//縦のライン
 		Novice::DrawLine(static_cast<int32_t>(kWindowWidth/2.0f), 0, static_cast<int32_t>(kWindowWidth / 2.0f), static_cast<int32_t>(kWindowHeight), WHITE);
 		//横のライン
@@ -132,12 +149,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		//ブレンドしたい↓
 		Novice::SetBlendMode(blend);
-		//マウス
-		Novice::DrawSprite(mousePos.x - static_cast<int32_t>(kSpriteSize/2.0f), mousePos.y - static_cast<int32_t>(kSpriteSize / 2.0f), particle, 1, 1, 0.0f, color);
 		//真ん中のスプライト
-		for (int i = 0; i < 3; i++){
-			Novice::DrawSprite((int)particlePos[i].x, (int)particlePos[i].y, particle, 1, 1, 0.0f, color);
+		for (int i = 0; i < 3; i++) {
+			Novice::DrawSprite((int)particlePos[i].x, (int)particlePos[i].y, particle, 1, 1, 0.0f, backRectColor);
 		}
+
+		//マウス
+		Novice::DrawSprite(mousePos.x - static_cast<int32_t>(kSpriteSize/2.0f), mousePos.y - static_cast<int32_t>(kSpriteSize / 2.0f), particle, 1, 1, 0.0f, frontRectColor);
 		//ブレンドしたい↑
 
 		///
