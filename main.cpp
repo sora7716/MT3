@@ -10,31 +10,31 @@ const float kWindowHeight = 720.0f;//ウィンドウの高さ
 const float kSpriteSize = 600.0f;//スプライトの幅
 
 //2次元のベクトル
-typedef struct Vector2 {
+struct Vector2 {
 	float x;
 	float y;
-}Vector2;
+};
 
 //2次元のベクトルInt
-typedef struct Vector2Int {
+struct Vector2Int {
 	int x;
 	int y;
-}Vector2Int;
+};
 
 //4次元のベクトル
-typedef struct Vector4 {
+struct Vector4 {
 	float x;
 	float y;
 	float z;
 	float w;
-}Vector4;
+};
 
 /// <summary>
 /// 正規化された値をunsigned intに変換
 /// </summary>
 /// <param name="normal">正規化された値</param>
 /// <returns></returns>
-unsigned int NormalizeColorByte(float normal) {
+uint32_t NormalizeColorByte(float normal) {
 	int result = 0;
 	if (normal < 0.0f) {
 		result = 0;
@@ -50,7 +50,7 @@ unsigned int NormalizeColorByte(float normal) {
 /// </summary>
 /// <param name="color">カラー</param>
 /// <returns>カラーコード</returns>
-unsigned int ColorCodeFromVector4(const Vector4& color) {
+uint32_t ColorCodeFromVector4(const Vector4& color) {
 	int r = NormalizeColorByte(color.x);
 	int g = NormalizeColorByte(color.y);
 	int b = NormalizeColorByte(color.z);
@@ -69,7 +69,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	char preKeys[256] = { 0 };
 
 	//スプライトのロード
-	int particle = Novice::LoadTexture("./Resources/particle.png");
+	int32_t particle = Novice::LoadTexture("./Resources/particle.png");
 
 	//マウスの座標
 	Vector2Int mousePos = { 0, 0 };
@@ -151,7 +151,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		Novice::SetBlendMode(blend);
 		//真ん中のスプライト
 		for (int i = 0; i < 3; i++) {
-			Novice::DrawSprite((int)particlePos[i].x, (int)particlePos[i].y, particle, 1, 1, 0.0f, backRectColor);
+			Novice::DrawSprite((int32_t)particlePos[i].x, (int32_t)particlePos[i].y, particle, 1, 1, 0.0f, backRectColor);
 		}
 
 		//マウス
