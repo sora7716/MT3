@@ -6,7 +6,7 @@
 const char kWindowTitle[] = "AL2_1-5";
 
 //2次元のベクトル
-typedef struct Vector2 {
+struct Vector2 {
 	float x;
 	float y;
 
@@ -16,29 +16,67 @@ typedef struct Vector2 {
 		this->y += v.y;
 		return *this;
 	}
-}Vector2;
+};
 
 //サイズ
-typedef struct Size {
+struct Size {
 	float width;
 	float height;
-}Size;
+};
 
 //2次元の整数ベクトル
-typedef struct Vector2Int {
+struct Vector2Int {
 	int32_t x;
 	int32_t y;
-}Vector2Int;
+};
 
 //パーティクルのデータ
-typedef struct ParticleData {
+struct ParticleData {
 	Vector2 position;
 	Vector2 velocity;
 	Vector2 acceleration;
 	int32_t radius;
 	Vector2Int random;
+	uint32_t color;
 	bool isAlive;
-}ParticleData;
+};
+
+//四次元のベクトル
+struct Vector4 {
+	float x;
+	float y;
+	float z;
+	float w;
+};
+
+/// <summary>
+/// 正規化された値をunsigned intに変換
+/// </summary>
+/// <param name="normal">正規化された値</param>
+/// <returns></returns>
+uint32_t NormalizeColorByte(float normal) {
+	int result = 0;
+	if (normal < 0.0f) {
+		result = 0;
+	} else if (normal >= 1.0f) {
+		result = 255;
+	}
+	result = static_cast<int>(normal * 255.0f);
+	return result;
+}
+
+/// <summary>
+/// Vector4をカラーコードに変換
+/// </summary>
+/// <param name="color">カラー</param>
+/// <returns>カラーコード</returns>
+uint32_t ColorCodeFromVector4(const Vector4& color) {
+	int r = NormalizeColorByte(color.x);
+	int g = NormalizeColorByte(color.y);
+	int b = NormalizeColorByte(color.z);
+	int a = NormalizeColorByte(color.w);
+	return (r << 24) | (g << 16) | (b << 8) | a;
+}
 
 //パーティクルの数
 const int32_t kParticleNum = 300;
@@ -57,6 +95,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//パーティクル全体にかかる加速度
 	Vector2 particleAcceleration = { 0.0f, 0.3f };
+	Vector4 particleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	bool isRandomColor = false;//ランダムカラーにするかどうか
 
 	//パーティクルの変数↓
 	ParticleData particle[kParticleNum] = { 0 };
@@ -66,6 +106,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		particle[i].acceleration = particleAcceleration;
 		particle[i].radius = 0;
 		particle[i].random = { 0,0 };
+		particle[i].color = WHITE;
 		particle[i].isAlive = false;
 	}
 	//パーティクルの変数↑
@@ -103,6 +144,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				particle[i].velocity = { 0,0 };
 			}
 		}
+		ImGui::Checkbox("isRandomColor", &isRandomColor);
+		if (!isRandomColor) {
+			ImGui::ColorEdit4("color", &particleColor.x);
+		}
 		ImGui::End();
 
 		//パーティクルの召喚
@@ -123,12 +168,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					static_cast<float>(particle[i].random.x),
 					static_cast<float>(particle[i].random.y)
 				};
+				//ランダムカラーを設定
+				if (isRandomColor) {
+					Vector4 randomColor = {
+						static_cast<float>(rand() % 256) / 255.0f,
+						static_cast<float>(rand() % 256) / 255.0f,
+						static_cast<float>(rand() % 256) / 255.0f,
+						1.0f
+					};
+					//色を変更
+					particle[i].color = ColorCodeFromVector4(randomColor);
+				}
 				break;
 			}
 		}
 
 		//パーティクルの動き
 		for (int32_t i = 0; i < kParticleNum; i++) {
+			//色を変更(ランダムカラーが設定されてなければ)
+			if (!isRandomColor) {
+				particle[i].color = ColorCodeFromVector4(particleColor);
+			}
 			if (particle[i].isAlive) {
 				particle[i].velocity += particle[i].acceleration;
 				particle[i].position += particle[i].velocity;
@@ -163,7 +223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				Novice::DrawEllipse(
 					static_cast<int32_t>(particle[i].position.x),
 					static_cast<int32_t>(particle[i].position.y),
-					particle[i].radius, particle[i].radius, 0.0f, WHITE, kFillModeSolid);
+					particle[i].radius, particle[i].radius, 0.0f, particle[i].color, kFillModeSolid);
 			}
 		}
 
