@@ -96,6 +96,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//パーティクル全体にかかる加速度
 	Vector2 particleAcceleration = { 0.0f, 0.3f };
 	Vector4 particleColor = { 1.0f, 1.0f, 1.0f, 1.0f };
+	float particleRadius = 5.0f;
+	int32_t randomRadiusRage = 8;//ランダムな半径にする場合の範囲
+	bool isRandomRadius = false;//ランダムな半径にするかどうか
 	bool isRandomColor = false;//ランダムカラーにするかどうか
 
 	//パーティクルの変数↓
@@ -136,17 +139,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		ImGui::Begin("Debug Particle");
 		ImGui::DragFloat2("EmitterSize", &emitSize.width, 0.1f, 1.0f, 1000.0f, "%.1f");
+		if (!isRandomRadius) {
+			ImGui::DragFloat("ParticleSize", &particleRadius, 0.1f,0.0f, 100.0f, "%.1f");
+		} else {
+			ImGui::DragInt("ParticleRadiusRage", &randomRadiusRage, 1.0f, 1, 100, "%d");
+		}
+		if (!isRandomColor) {
+			ImGui::ColorEdit4("Color", &particleColor.x);
+		}
 		ImGui::DragFloat2("ParticleAcceleration", &particleAcceleration.x, 0.1f, -10.0f, 10.0f, "%.1f");
+		ImGui::Checkbox("IsRandomColor", &isRandomColor);
+		ImGui::Checkbox("IsRandomSize", &isRandomRadius);
 		if (ImGui::Button("Reset")) {
 			for (int32_t i = 0; i < kParticleNum; i++) {
 				particle[i].isAlive = false;
 				particle[i].position = { 0,0 };
 				particle[i].velocity = { 0,0 };
 			}
-		}
-		ImGui::Checkbox("isRandomColor", &isRandomColor);
-		if (!isRandomColor) {
-			ImGui::ColorEdit4("color", &particleColor.x);
 		}
 		ImGui::End();
 
@@ -162,7 +171,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				particle[i].random.x = rand() % static_cast<int32_t>(emitSize.width) + mousePos.x - static_cast<int32_t>(emitSize.width / 2.0f);
 				particle[i].random.y = rand() % static_cast<int32_t>(emitSize.height) + mousePos.y - static_cast<int32_t>(emitSize.height / 2.0f);
 				//大きさもランダムで決める
-				particle[i].radius = rand() % 8 + 3;
+				if (isRandomRadius) {
+					particle[i].radius = rand() % randomRadiusRage + 1;
+				}
 				//位置を設定
 				particle[i].position = {
 					static_cast<float>(particle[i].random.x),
@@ -188,6 +199,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//色を変更(ランダムカラーが設定されてなければ)
 			if (!isRandomColor) {
 				particle[i].color = ColorCodeFromVector4(particleColor);
+			}
+			//大きさを変更(ランダムサイズが設定されてなければ)
+			if (!isRandomRadius) {
+				particle[i].radius = static_cast<int32_t>(particleRadius);
 			}
 			if (particle[i].isAlive) {
 				particle[i].velocity += particle[i].acceleration;
