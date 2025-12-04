@@ -138,24 +138,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		///
 
 		ImGui::Begin("Debug Particle");
+		ImGui::Text("Emitter: Width(Q+/E-) Height(Z+/C-)");
 		ImGui::DragFloat2("EmitterSize", &emitSize.width, 0.1f, 1.0f, 1000.0f, "%.1f");
 		if (!isRandomRadius) {
-			ImGui::DragFloat("ParticleSize", &particleRadius, 0.1f,0.0f, 100.0f, "%.1f");
-		} else {
-			ImGui::DragInt("ParticleRadiusRange", &randomRadiusRange, 1.0f, 1, 100, "%d");
-		}
+			ImGui::DragFloat("ParticleRadius", &particleRadius, 0.1f,0.0f, 100.0f, "%.1f");
+		} 
 		if (!isRandomColor) {
 			ImGui::ColorEdit4("Color", &particleColor.x);
 		}
 		ImGui::DragFloat2("ParticleAcceleration", &particleAcceleration.x, 0.1f, -10.0f, 10.0f, "%.1f");
-		ImGui::Checkbox("IsRandomColor", &isRandomColor);
-		ImGui::Checkbox("IsRandomSize", &isRandomRadius);
 		if (ImGui::Button("Reset")) {
 			for (int32_t i = 0; i < kParticleNum; i++) {
 				particle[i].isAlive = false;
 				particle[i].position = { 0,0 };
 				particle[i].velocity = { 0,0 };
 			}
+		}
+		ImGui::Text("\n");
+		ImGui::Text("---plus alpha---");
+		ImGui::Checkbox("IsRandomColor", &isRandomColor);
+		ImGui::Checkbox("IsRandomSize", &isRandomRadius);
+		if(isRandomRadius) {
+			ImGui::DragInt("ParticleRadiusRange", &randomRadiusRange, 1.0f, 1, 100, "%d");
 		}
 		ImGui::End();
 
@@ -214,6 +218,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				particle[i].position = { 0,0 };
 				particle[i].velocity = { 0,0 };
 			}
+		}
+
+		//キー入力でエミッターの範囲を変更
+		if (keys[DIK_Q]) {
+			emitSize.width++;
+		} else if (keys[DIK_E]) {
+			emitSize.width--;
+		}
+
+		if (keys[DIK_Z]) {
+			emitSize.height++;
+		} else if (keys[DIK_C]) {
+			emitSize.height--;
 		}
 		///
 		/// ↑更新処理ここまで
