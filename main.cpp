@@ -155,7 +155,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 		}
 		ImGui::Text("\n");
-		ImGui::Text("---plus alpha---");
+		ImGui::Text("===exVer===");
 		ImGui::Checkbox("IsRandomColor", &isRandomColor);
 		ImGui::Checkbox("IsRandomSize", &isRandomRadius);
 		if(isRandomRadius) {
